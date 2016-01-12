@@ -18,7 +18,7 @@ Object.prototype
 
 Category: Built-in
 
-Object is the root of JavaScript's hierarchy of objects.
+Object is the root of JavaScript’s hierarchy of objects.
 
 
 Properties in Object.prototype
@@ -59,7 +59,7 @@ Or by providing a property with the global `@@meta:magical` symbol:
 function add(a, b) {
   return a + b;
 }
-add[Symbol.for('@@meta:magical)] = {
+add[Symbol.for('@@meta:magical')] = {
   'complexity': 'O(1)',
   'category': 'Maths',
   'documentation': 'Sums two numbers.'

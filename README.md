@@ -33,12 +33,10 @@ Comparing and testing:
 ( ... )
 ```
 
-You can attach meta-data by using the
-[metamagical-decorators](http://github.com/origamitower/metamagical-decorators)
-library:
+You can attach meta-data by using the `metamagical/decorators` module:
 
 ```js
-let { documentation, category } = require('metamagical-decorators');
+let { documentation, category } = require('metamagical/decorators');
 
 @documentation(`
 A structure for values that may not be present, or computations
@@ -53,7 +51,7 @@ class Maybe {
 }
 ```
 
-Or by providing a property with the global `@@meta:magical` symbol:
+By providing a property with the global `@@meta:magical` symbol:
 
 ```js
 function add(a, b) {
@@ -64,6 +62,15 @@ add[Symbol.for('@@meta:magical')] = {
   'category': 'Maths',
   'documentation': 'Sums two numbers.'
 };
+```
+
+Or, for objects that you don't control, by using the `metamagical/interface`
+module:
+
+```shell
+$ node
+> var { set } = require('metamagical/interface');
+> set(Object, 'name', 'Object');
 ```
 
 

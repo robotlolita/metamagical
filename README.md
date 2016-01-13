@@ -1,6 +1,10 @@
 Meta:Magical
 ===============
 
+> **WARNING**  
+> This project is still in **early stages of development**. It's not ready
+> to be used yet.
+
 Meta:Magical allows you to annotate objects in JavaScript, and inspect them in
 an interactive environment (REPL).
 
@@ -125,6 +129,11 @@ is that the entire "world" of the language is reflective and inspectable
 directly from the interactive shell:
 
 ![Siren's Browser in action](https://raw.githubusercontent.com/origamitower/metamagical/master/siren.png)
+
+> **NOTE**  
+> This isn't really anything novel. Emacs and Smalltalk have been doing this for
+> ages, but most programming environments still require you to go out of your way
+> to understand how things work.
 
 JavaScript isn't a language built with meta-data at its core, but it's still
 possible to attach meta-data to objects after-the-fact, and inspect these

@@ -37,7 +37,8 @@ Comparing and testing:
 ( ... )
 ```
 
-You can attach meta-data by using the `metamagical/decorators` module:
+You can attach meta-data to your own objects by using the
+`metamagical/decorators` module:
 
 ```js
 let { documentation, category } = require('metamagical/decorators');
@@ -55,7 +56,7 @@ class Maybe {
 }
 ```
 
-By providing a property with the global `@@meta:magical` symbol:
+Or by providing a property with the global `@@meta:magical` symbol:
 
 ```js
 function add(a, b) {
@@ -68,8 +69,8 @@ add[Symbol.for('@@meta:magical')] = {
 };
 ```
 
-Or, for objects that you don't control, by using the `metamagical/interface`
-module:
+For objects that you don't control, you can attach meta-data by using the
+`metamagical/interface` module:
 
 ```shell
 $ node

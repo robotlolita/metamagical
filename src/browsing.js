@@ -106,11 +106,11 @@ function prop(object) {
 }
 
 function summary(meta) {
-  var doc = meta.documentation || '';
-  if (doc.length > 68) {
-    doc = doc.slice(0, 65) + '...';
+  var doc = (meta.documentation || '').split(/(\r?\n|\n?\r){2,}/)[0];
+  if (doc.length > 73) {
+    doc = doc.slice(0, 70) + '...';
   }
-  return doc.trim();
+  return doc.replace(/\r?\n/g, ' ').trim();
 }
 
 
@@ -218,7 +218,7 @@ var Browser = Refinable.refine({
           }
           var doc = summary(meta);
           if (doc) {
-            display.line(`    | ${summary(meta)}`);
+            display.line(faded(`    | ${summary(meta)}`));
           }
         });
       });

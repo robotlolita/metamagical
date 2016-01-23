@@ -10,5 +10,4 @@
 //
 //----------------------------------------------------------------------
 
-require('./annotations');
-module.exports = require('./browsing');
+require('./object');

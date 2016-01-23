@@ -1,0 +1,6 @@
+{
+    "presets": ["es2015"],
+    "plugins": ["transform-async-to-generator",
+                "transform-function-bind",
+                "transform-object-rest-spread"]
+}

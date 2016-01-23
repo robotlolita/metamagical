@@ -10,7 +10,7 @@
 //
 //----------------------------------------------------------------------
 
-// # module: metamagical/decorators
+// # module: metamagical/decorators/prefix
 //
 // This module provides decorators that can be used to attach common
 // meta-data to objects. These are intended to be used primarily with
@@ -32,15 +32,12 @@ var isFrozen = Object.isFrozen;
 
 // -- Helpers ----------------------------------------------------------
 
-// ### function: toDecorator(fn, meta)
+// ### function: withMeta(fn, meta)
 //
-// Converts a regular function to a decorator on Value descriptions.
-function toDecorator(fn, meta) {
-  var result = function(target, name, description) {
-    fn(description.value);
-  };
-  result[metaSymbol] = meta;
-  return result;
+// Updates a function with some meta-magical metadata.
+function withMeta(fn, meta) {
+  fn[metaSymbol] = meta;
+  return fn;
 }
 
 // ### function: set(attribute)(value)(object)
@@ -93,7 +90,7 @@ function set(attribute) {
 
 // -- Exports ----------------------------------------------------------
 module.exports = {
-  name: toDecorator(set('name'), {
+  name: withMeta(set('name'), {
     name: 'name',
     signature: 'name(name)',
     type: '(String) -> (Object) -> Void',
@@ -101,7 +98,7 @@ module.exports = {
     documentation: 'Describes the name of an object.'
   }),
 
-  signature: toDecorator(set('signature'), {
+  signature: withMeta(set('signature'), {
     name: 'signature',
     signature: 'signature(signature)',
     type: '(String) -> (Object) -> Void',
@@ -109,7 +106,7 @@ module.exports = {
     documentation: 'Describes the signature of a function.'
   }),
 
-  type: toDecorator(set('type'), {
+  type: withMeta(set('type'), {
     name: 'type',
     signature: 'type(type)',
     type: '(String) -> (Object) -> Void',
@@ -117,7 +114,7 @@ module.exports = {
     documentation: 'Describes the type of an object.'
   }),
 
-  category: toDecorator(set('category'), {
+  category: withMeta(set('category'), {
     name: 'category',
     signature: 'category(name)',
     type: '(String) -> (Object) -> Void',
@@ -128,7 +125,7 @@ module.exports = {
                  + 'easier to understand.'
   }),
 
-  tags: toDecorator(set('tags'), {
+  tags: withMeta(set('tags'), {
     name: 'tags',
     signature: 'tags(tags)',
     type: '(Array<String>) -> (Object) -> Void',
@@ -139,7 +136,7 @@ module.exports = {
                  + 'categorisation that is more flexible than `category`.'
   }),
 
-  documentation: toDecorator(set('documentation'), {
+  documentation: withMeta(set('documentation'), {
     name: 'documentation',
     signature: 'documentation(text)',
     type: '(String) -> (Object) -> Void',
@@ -152,7 +149,7 @@ module.exports = {
                  + 'they should use it or not.'
   }),
 
-  complexity: toDecorator(set('complexity'), {
+  complexity: withMeta(set('complexity'), {
     name: 'complexity',
     signature: 'complexity(o)',
     type: '(String) -> (Object) -> Void',
@@ -164,7 +161,7 @@ module.exports = {
                  + 'algorithmic performance.'
   }),
 
-  portability: toDecorator(set('portability'), {
+  portability: withMeta(set('portability'), {
     name: 'portability',
     signature: 'portability(string)',
     type: '(String) -> (Object) -> Void',
@@ -174,7 +171,7 @@ module.exports = {
                  + 'of which non-portable things it depends on.'
   }),
 
-  stability: toDecorator(set('stability'), {
+  stability: withMeta(set('stability'), {
     name: 'stability',
     signature: 'stability(string)',
     type: '(String) -> (Object) -> Void',
@@ -189,7 +186,7 @@ module.exports = {
                  + '    fixes can still be released.'
   }),
 
-  seeAlso: toDecorator(set('seeAlso'), {
+  seeAlso: withMeta(set('seeAlso'), {
     name: 'seeAlso',
     signature: 'seeAlso(thing)',
     type: '(String) -> (Object) -> Void',
@@ -197,7 +194,7 @@ module.exports = {
     documentation: 'Describes related functionality.'
   }),
 
-  platforms: toDecorator(set('platforms'), {
+  platforms: withMeta(set('platforms'), {
     name: 'platforms',
     signature: 'platforms(platforms)',
     type: '(Array<String>) -> (Object) -> Void',
@@ -205,7 +202,7 @@ module.exports = {
     documentation: 'Describes which platforms this functionality supports.'
   }),
 
-  since: toDecorator(set('since'), {
+  since: withMeta(set('since'), {
     name: 'since',
     signature: 'since(version)',
     type: '(String) -> (Object) -> Void',
@@ -213,7 +210,7 @@ module.exports = {
     documentation: 'Describes which version introduced this functionality.'
   }),
 
-  deprecated: toDecorator(set('deprecated'), {
+  deprecated: withMeta(set('deprecated'), {
     name: 'deprecated',
     signature: 'deprecated(reason)',
     type: '(String) -> (Object) -> Void',
@@ -224,7 +221,7 @@ module.exports = {
                  + 'their code using the deprecated feature.'
   }),
 
-  licence: toDecorator(set('licence'), {
+  licence: withMeta(set('licence'), {
     name: 'licence',
     signature: 'licence(licence)',
     type: '(String) -> (Object) -> Void',
@@ -232,7 +229,7 @@ module.exports = {
     documentation: 'Describes the licence under which the functionality is released.'
   }),
 
-  authors: toDecorator(set('authors'), {
+  authors: withMeta(set('authors'), {
     name: 'authors',
     signature: 'authors(authors)',
     type: '(Array<String>) -> (Object) -> Void',

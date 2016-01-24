@@ -38,6 +38,7 @@ var subHeading = chalk.bold;
 var faded = chalk.grey;
 var flag = chalk.grey.italic;
 var label = chalk.bold;
+var warning = chalk.red.bold;
 var minorHeading = chalk.bold;
 var write = console.log.bind(console);
 var prototypeOf = Object.getPrototypeOf;
@@ -217,16 +218,22 @@ var Browser = Refinable.refine({
 
   show() {
     var meta = getObjectMeta(this.target());
-    this.display().heading(signature(meta));
+    var display = this.display();
+    display.heading(signature(meta));
+    if (meta.deprecated) {
+      let text = '> ' + lines(meta.deprecated.trim()).join('\n> ');
+      display.line(warning('DEPRECATED'));
+      display.markdown(text);
+    }
     this.metadata();
-    this.display().lineBreak();
+    display.lineBreak();
 
     this.documentation();
-    this.display().lineBreak();
+    display.lineBreak();
     this.source();
-    this.display().lineBreak();
+    display.lineBreak();
     this.stability();
-    this.display().lineBreak();
+    display.lineBreak();
     this.properties();
   },
 

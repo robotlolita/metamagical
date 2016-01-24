@@ -323,6 +323,9 @@ var Browser = Refinable.refine({
     if (meta.licence) {
       d.field("Licence", meta.licence);
     }
+    if (meta.authors) {
+      d.field("Authors", meta.authors.join(', '));
+    }
     if (meta.repository) {
       d.field("Repository", meta.repository);
     }

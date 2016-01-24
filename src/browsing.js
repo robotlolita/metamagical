@@ -282,6 +282,10 @@ var Browser = Refinable.refine({
     if (meta.module) {
       d.field('From', meta.module);
     }
+    if (meta.belongsTo) {
+      var containerMeta = getObjectMeta(meta.belongsTo);
+      d.field('Defined in', name(containerMeta));
+    }
     if (meta.complexity) {
       d.field("Complexity", meta.complexity);
     }

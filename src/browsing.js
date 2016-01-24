@@ -36,6 +36,7 @@ var error = chalk.red;
 var heading = chalk.green.bold;
 var subHeading = chalk.bold;
 var faded = chalk.grey;
+var flag = chalk.grey.italic;
 var label = chalk.bold;
 var minorHeading = chalk.bold;
 var write = console.log.bind(console);
@@ -224,9 +225,18 @@ var Browser = Refinable.refine({
       pairs.forEach(([category, methods]) => {
         display.lineBreak();
         display.minorHeading(category);
+        var nameLength = Math.max.apply(null, methods.map(([[name]]) => name.length));
         methods.forEach(([[name, descriptor], method]) => {
           var meta = getObjectMeta(method);
-          display.line(`  • ${name}`);
+          var flags = [
+            descriptor.enumerable?    'enum' : '',
+            descriptor.configurable?  'config' : '',
+            descriptor.writable?      'write' : ''
+          ].filter(Boolean).join(', ');
+          if (flags)  flags = '(' + flags + ')';
+          var pad = repeat(" ", nameLength - name.length);
+
+          display.line(`  • ${name}   ${pad}${flag(flags)}`);
           var doc = summary(meta);
           if (doc) {
             display.line(faded(`    | ${summary(meta)}`));

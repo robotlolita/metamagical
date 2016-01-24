@@ -53,17 +53,33 @@ function lines(text) {
   return text.split(/\r\n|\n\r|\r|\n/);
 }
 
-function getObjectMeta(object) {
-  var result = {};
-  if (Object(object) !== object) {
-    return result;
+function inheritedMeta(m, name) {
+  if (m[name]) {
+    return m[name];
+  } else {
+    var parent = m.belongsTo;
+    if (parent) {
+      return inheritedMeta(mm.get(parent), name);
+    } else {
+      return null;
+    }
   }
-  while (object != null) {
-    result = extend(mm.get(object), result);
-    object = prototypeOf(object);
-  }
+}
 
-  return result;
+function getObjectMeta(object) {
+  if (Object(object) !== object) {
+    return {};
+  }
+  var meta = mm.get(object);
+  return extend(meta, {
+    authors     : inheritedMeta(meta, 'authors'),
+    licence     : inheritedMeta(meta, 'licence'),
+    since       : inheritedMeta(meta, 'since'),
+    platforms   : inheritedMeta(meta, 'platforms'),
+    repository  : inheritedMeta(meta, 'repository'),
+    stability   : inheritedMeta(meta, 'stability'),
+    portability : inheritedMeta(meta, 'portability')
+  });
 }
 
 function signature(meta) {

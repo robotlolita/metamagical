@@ -122,11 +122,12 @@ function prop(object) {
 }
 
 function summary(meta) {
-  var doc = (meta.documentation || '').split(/(\r?\n|\n?\r){2,}/)[0];
+  var doc = meta.documentation || '';
+  var shortDoc = doc.split(/(\r?\n|\n?\r){2,}/)[0];
   if (doc.length > 73) {
-    doc = doc.slice(0, 70) + '...';
+    shortDoc = shortDoc.slice(0, 70).trim() + '...';
   }
-  return doc.replace(/\r?\n/g, ' ').trim();
+  return shortDoc.replace(/\r?\n/g, ' ').trim();
 }
 
 
@@ -182,7 +183,9 @@ var Browser = Refinable.refine({
     return this;
   },
 
-  display: TerminalDisplay,
+  display() {
+    return TerminalDisplay;
+  },
 
   object(x) {
     return this.refine({ target: _ => x });
@@ -198,22 +201,22 @@ var Browser = Refinable.refine({
 
   show() {
     var meta = getObjectMeta(this.target());
-    this.display.heading(signature(meta));
+    this.display().heading(signature(meta));
     this.metadata();
-    this.display.lineBreak();
+    this.display().lineBreak();
 
     this.documentation();
-    this.display.lineBreak();
+    this.display().lineBreak();
     this.source();
-    this.display.lineBreak();
+    this.display().lineBreak();
     this.stability();
-    this.display.lineBreak();
-    this.methods();
+    this.display().lineBreak();
+    this.properties();
   },
 
-  methods() {
+  properties() {
     var target = this.target();
-    var display = this.display;
+    var display = this.display();
     var meta = getObjectMeta(target);
     display.subHeading(`Messages in ${name(meta)}`);
     showMessages(target);
@@ -259,23 +262,26 @@ var Browser = Refinable.refine({
     if (typeof target === "function") {
       var meta = getObjectMeta(target);
       var name = meta.name || '(Anonymous Object)';
-      this.display.subHeading("Source for " + name);
-      this.display.markdown("```js\n" + target.toString() + "\n```");
+      this.display().subHeading("Source for " + name);
+      this.display().markdown("```js\n" + target.toString() + "\n```");
     }
   },
 
   documentation() {
     var meta = getObjectMeta(this.target());
     if (meta.documentation) {
-      this.display.markdown(meta.documentation);
+      this.display().markdown(meta.documentation);
     } else {
-      this.display.line("(No documentation)");
+      this.display().line("(No documentation)");
     }
   },
 
   metadata() {
     var meta = getObjectMeta(this.target());
-    var d = this.display;
+    var d = this.display();
+    if (meta.module) {
+      d.field('From', meta.module);
+    }
     if (meta.complexity) {
       d.field("Complexity", meta.complexity);
     }
@@ -308,8 +314,8 @@ var Browser = Refinable.refine({
   stability() {
     var meta = getObjectMeta(this.target());
     if (meta.stability && Stability[meta.stability]) {
-      this.display.markdown(Stability[meta.stability].explain());
-      this.display.lineBreak();
+      this.display().markdown(Stability[meta.stability].explain());
+      this.display().lineBreak();
     }
   }
 });
@@ -336,20 +342,21 @@ meta(Browser, {
  (this is similar to how \`cd\` works in a shell). The [[.object()]] and
  [[.property()]] methods respectively allow these refinements:
 
-     var inspect = Browser.property("inspect");
-     inspect.documentation();
-     // Documentation for Browser.inspect()
-     // -----------------------------------
+
+     var source = Browser.property("source");
+     source.documentation();
+     // Displays the source code for the current browser's [[target]].
      //
-     // Inspects the object this browser is pointing to.
+     //   NOTE:
+     //   Only Function objects are supported.
 
      var object = Browser.object(Object);
      object.metadata();
-     // Metadata for Object
-     // -------------------
-     //
-     // Category: Built-in
-     // Platforms: [ECMAScript]
+     // From: <native>
+     // Type: (Any) -> Object
+     // Category: Base objects
+     // Platforms: ECMAScript
+
 
  Besides the [[object]] configuration, the Browser also expects a
  [[display]], which determines how the information output will be
@@ -362,29 +369,139 @@ meta(Browser, {
  page with the information, they would just need to provide a new
  display configuration:
 
+
      var h = require('html');
      var markdown = require('markdown');
      var HTMLDisplay = Browser.display.refine({
        documentation(meta) {
-         return h('div',
-           h('h1', 'Documentation for ' + meta.signature),
-           h('div.documentation', markdown(meta.documentation))
+         write(
+           h('div',
+             h('h1', 'Documentation for ' + meta.signature),
+             h('div.documentation', markdown(meta.documentation))
+           )
          )
        }
      });
 
      var HTMLBrowser = Browser.refine({ display: _ => HTMLDisplay });
      HTMLBrowser.documentation()
-     // "<div><h1>Documentation for Browser</h1><div ..."
+     // <div><h1>Documentation for Browser</h1><div...
    `
  });
 
 meta(Browser.toString, {
   name: 'toString',
-  signature: '.toString()',
+  signature: 'toString()',
   type: 'Object.() -> String',
   category: 'Inspecting',
   documentation: 'A textual description of this object'
+});
+
+meta(Browser.target, {
+  name: 'target',
+  signature: 'target()',
+  type: 'Browser.() -> Object',
+  category: 'Configuration',
+  documentation: 'The object the Browser is looking at.'
+});
+
+meta(Browser.display, {
+  name: 'display',
+  signature: 'display()',
+  type: 'Browser.() -> Display',
+  category: 'Configuration',
+  documentation: 'Dictates how information is presented by the Browser.'
+});
+
+meta(Browser.object, {
+  name: 'object',
+  signature: 'object(value)',
+  type: 'Browser.(Object) -> Browser',
+  category: 'Refinement',
+  documentation: `
+Constructs a browser pointing to [[value]].
+
+This method constructs a new [[Browser]] object whose [[target]]
+will be the provided value.
+  `
+});
+
+meta(Browser.property, {
+  name: 'property',
+  signature: 'property(name)',
+  type: 'Browser.(String | Symbol) -> Browser :: throws',
+  category: 'Refinement',
+  documentation: `
+Constructs a browser pointing to the given property of the current [[target]].
+
+> **WARNING:**  
+> If a property with the given name does not exist in the target, an
+> error is thrown. The Browser does not distinguish between own and
+> inherited properties for this particular method.
+  `
+});
+
+meta(Browser.show, {
+  name: 'show',
+  signature: 'show()',
+  type: 'Browser.show() -> Void :: IO',
+  category: 'Visualising',
+  documentation: `
+Shows detailed information about the object the current browser's [[target]].
+  `
+});
+
+meta(Browser.properties, {
+  name: 'properties',
+  signature: 'properties()',
+  type: 'Browser.properties() -> Void :: IO',
+  category: 'Visualising',
+  documentation: `
+Lists which properties can be accessible from the current browser's [[target]].
+  `
+});
+
+meta(Browser.source, {
+  name: 'source',
+  signature: 'source()',
+  type: 'Browser.source() -> Void :: IO',
+  category: 'Visualising',
+  documentation: `
+Displays the source code for the current browser's [[target]].
+
+> **NOTE:**  
+> Only Function objects are supported.
+  `
+});
+
+meta(Browser.documentation, {
+  name: 'documentation',
+  signature: 'documentation()',
+  type: 'Browser.documentation() -> Void :: IO',
+  category: 'Visualising',
+  documentation: `
+Displays the documentation of the current browser's [[target]].
+  `
+});
+
+meta(Browser.metadata, {
+  name: 'metadata',
+  signature: 'metadata()',
+  type: 'Browser.metadata() -> Void :: IO',
+  category: 'Visualising',
+  documentation: `
+Displays common meta-data for the current browser's [[target]].
+  `
+});
+
+meta(Browser.stability, {
+  name: 'stability',
+  signature: 'stability()',
+  type: 'Browser.stability() -> Void :: IO',
+  category: 'Visualising',
+  documentation: `
+Displays the stability of the API for the current browser's [[target]].
+  `
 });
 
 // -- Exports ----------------------------------------------------------

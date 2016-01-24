@@ -10,13 +10,6 @@
 //
 //----------------------------------------------------------------------
 
-// # module: metamagical/interface
-//
-// This module defines a way of attaching meta-data to an object,
-// and a way of retrieving meta-data from an object. Things building
-// on top of this meta-data are expected to import this module.
-
-
 // Meta:Magical has a central WeakMap that maps objects to their
 // meta-data, where meta-data is simply a plain JavaScript object
 // with a particular set of properties. The set of properties itself
@@ -67,10 +60,11 @@ function get(object) {
   return data;
 }
 get[metaSymbol] = {
-  'name'          : 'get',
-  'signature'     : 'get(object)',
-  'type'          : '(Object) -> { String -> Any }',
-  'documentation' : 'Retrieves all meta-data associated with `object`.'
+  name          : 'get',
+  signature     : 'get(object)',
+  type          : '(Object) -> { String -> Any }',
+  belongsTo     : exports,
+  documentation : 'Retrieves all meta-data associated with `object`.'
 };
 
 
@@ -84,23 +78,29 @@ function set(object, key, value) {
   return object;
 }
 set[metaSymbol] = {
-  'name': 'set',
-  'signature': 'set(object, key, value)',
-  'type': '(Object, String, Any) -> Object',
-  'documentation': 'Updates the meta-data for `object`, '
-                 + 'by associating a new `value` with `key`.'
+  name          : 'set',
+  signature     : 'set(object, key, value)',
+  type          : '(Object, String, Any) -> Object',
+  belongsTo     : exports,
+  documentation : 'Updates the meta-data for `object`, '
+                + 'by associating a new `value` with `key`.'
 };
 
 
 // -- Exports ----------------------------------------------------------
-module.exports = {
-  get: get,
-  set: set
-};
+exports.get = get;
+exports.set = set;
 
-module.exports[metaSymbol] = {
-  'stability' : 'stable',
-  'authors'   : ['Quildreen Motta'],
-  'licence'   : 'MIT',
-  'platforms' : ['ECMAScript 2015']
+exports[metaSymbol] = {
+  module    : 'metamagical/interface',
+  name      : 'module metamagical/interface',
+  stability : 'stable',
+  authors   : ['Quildreen Motta'],
+  licence   : 'MIT',
+  platforms : ['ECMAScript 2015'],
+  documentation: `
+This module defines a way of attaching meta-data to an object,
+and a way of retrieving meta-data from an object. Things building
+on top of this meta-data are expected to import this module.
+  `
 };

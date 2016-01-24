@@ -87,9 +87,29 @@ set[metaSymbol] = {
 };
 
 
+function update(object, newMeta) {
+  assertObject(object);
+
+  var meta = metadata.get(object) || {};
+  Object.assign(meta, newMeta);
+  metadata.set(object, meta);
+
+  return object;
+}
+update[metaSymbol] = {
+  name          : 'update',
+  signature     : 'update(object, meta)',
+  type          : '(Object, { String -> Any }) -> Object',
+  belongsTo     : exports,
+  documentation : 'Updates the meta-data for `object` by merging '
+                + 'the values provided by `meta`.'
+};
+
+
 // -- Exports ----------------------------------------------------------
-exports.get = get;
-exports.set = set;
+exports.get    = get;
+exports.set    = set;
+exports.update = update;
 
 exports[metaSymbol] = {
   module    : 'metamagical/interface',

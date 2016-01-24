@@ -10,7 +10,7 @@
 //
 //----------------------------------------------------------------------
 
-var meta = require('../../decorators');
+var meta = require('../../interface').update;
 
 meta(Object, {
   name: 'Object',

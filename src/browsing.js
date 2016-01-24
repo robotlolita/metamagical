@@ -41,7 +41,7 @@ var minorHeading = chalk.bold;
 var write = console.log.bind(console);
 var prototypeOf = Object.getPrototypeOf;
 var properties = Object.getOwnPropertyNames;
-
+var property = Object.getOwnPropertyDescriptor;
 
 // -- Helpers ----------------------------------------------------------
 function repeat(text, times) {
@@ -95,10 +95,25 @@ function toPairs(map) {
   return [...map.entries()];
 }
 
+function isFunction(a) {
+  return typeof a === 'function';
+}
+
+function describe(p, name) {
+  return [
+    p.value && isFunction(p.value)?  name + '()'
+  : p.get && p.set?                  'get/set ' + name
+  : p.get?                           'get ' + name
+  : p.set?                           'set ' + name
+  : /* otherwise */                  name
+  , p];
+}
+
 function prop(object) {
   return (key) => {
     try {
-      return [key, object[key]];
+      var p = property(object, key);
+      return [describe(p, key), object[key]];
     } catch(e) {
       return null;
     }
@@ -209,13 +224,9 @@ var Browser = Refinable.refine({
       pairs.forEach(([category, methods]) => {
         display.lineBreak();
         display.minorHeading(category);
-        methods.forEach(([name, method]) => {
+        methods.forEach(([[name, descriptor], method]) => {
           var meta = getObjectMeta(method);
-          if (!meta.signature && !meta.name) {
-            display.line(`  • ${name}`);
-          } else {
-            display.line(`  • ${signature(meta)}`);
-          }
+          display.line(`  • ${name}`);
           var doc = summary(meta);
           if (doc) {
             display.line(faded(`    | ${summary(meta)}`));

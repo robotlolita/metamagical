@@ -19,6 +19,7 @@ meta(Object, {
   category: 'Base objects',
   stability: 'locked',
   platforms: ['ECMAScript'],
+  authors: ['ECMA TC39'],
   module: '<native>',
   documentation: `
 Creates an object wrapper for a given value.
@@ -40,9 +41,9 @@ if (Object.assign) {
     type: '(target:Object, ...Object) -> target :: mutates',
     complexity: 'O(n), n is the number of properties to copy',
     category: 'Refinement',
-    stability: 'locked',
-    module: '<native>',
+    belongsTo: Object,
     platforms: ['ECMAScript 2015'],
+    since: 'es6',
     documentation: `
 Copies enumerable own property values from [[sources]] to [[target]].
 
@@ -90,9 +91,9 @@ if (Object.create) {
     signature: 'create(prototype[, properties])',
     type: '(a:Object, PropertyDescriptors) -> a <| Object',
     category: 'Refinement',
-    stability: 'locked',
-    module: '<native>',
+    belongsTo: Object,
     platforms: ['ECMAScript 5'],
+    since: 'es5',
     documentation: `
 Constructs a new object with the given prototype.
 

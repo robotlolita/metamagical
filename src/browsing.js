@@ -16,7 +16,7 @@ var marked = require('marked');
 var TerminalRenderer = require('marked-terminal');
 var extend = require('xtend');
 
-var mm = require('../interface');
+var mm = require('metamagical-interface');
 var meta = require('../decorators');
 var Refinable = require('./refinable');
 var Stability = require('./stability');

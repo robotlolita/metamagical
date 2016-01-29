@@ -10,7 +10,7 @@
 //
 //----------------------------------------------------------------------
 
-var meta = require('../../interface').update;
+var meta = require('metamagical-interface').update;
 
 meta(Object, {
   name: 'Object',
@@ -98,6 +98,25 @@ if (Object.create) {
 Constructs a new object with the given prototype.
 
 
+    `
+  });
+}
+
+if (Object.prototype.__defineGetter__) {
+  meta(Object.prototype.__defineGetter__, {
+    name: '__defineGetter__',
+    signature: '__defineGetter__(property, function)',
+    type: 'Object.(String | Symbol, () -> Any)',
+    category: 'Proxying',
+    belongsTo: Object,
+    stability: 'deprecated',
+    deprecated: `
+This feature is deprecated in favour of defining getters using
+the Object Initialiser Syntax, or the [[Object.defineProperty]]
+API.
+
+However, as it is widely implemented and used on the Web, it is
+very unlikely that browser will stop implementing it.
     `
   });
 }

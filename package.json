@@ -1,6 +1,6 @@
 {
   "name": "metamagical",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An interface for attaching metadata to JavaScript objects.",
   "main": "./lib/index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "core.lambda": "^1.0.0",
     "marked": "^0.3.5",
     "marked-terminal": "^1.6.1",
+    "metamagical-interface": "^1.0.0",
     "xtend": "^4.0.1"
   }
 }

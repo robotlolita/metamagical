@@ -105,11 +105,19 @@ update[metaSymbol] = {
                 + 'the values provided by `meta`.'
 };
 
+metaSymbol[metaSymbol] = {
+  name          : '@@meta:magical',
+  type          : 'Symbol',
+  belongsTo     : exports,
+  documentation : 'A special symbol for attaching meta-data to objects.'
+};
+
 
 // -- Exports ----------------------------------------------------------
 exports.get    = get;
 exports.set    = set;
 exports.update = update;
+exports.symbol = metaSymbol;
 
 exports[metaSymbol] = {
   module    : 'metamagical/interface',

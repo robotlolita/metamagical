@@ -44,7 +44,7 @@ const compose = (f, g) => (value) => f(g(value))
 
 Compiles down to:
 
-```
+```js
 var compose = function compose(f, g) {
   return function (value) {
     return f(g(value));

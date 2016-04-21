@@ -1,0 +1,13 @@
+{
+  "name": "babel-plugin-transform-metamagical-comments",
+  "version": "0.1.0",
+  "description": "Compile meta:magical doc-comments to runtime object annotations.",
+  "license": "MIT",
+  "main": "index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {
+    "js-yaml": "^3.6.0"
+  }
+}

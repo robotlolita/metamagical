@@ -78,6 +78,12 @@ module.exports = function({ types: t }) {
     );
   }
 
+  function inferName(id, computed) {
+    return t.isIdentifier(id) && !computed?  { name: id.name }
+    :      t.isMemberExpression(id)?         inferName(id.property, id.computed)
+    :      /* otherwise */                   {};
+  }
+
   function objectToExpression(object) {
     return t.objectExpression(
       pairs(object).map(pairToProperty)
@@ -100,35 +106,87 @@ module.exports = function({ types: t }) {
     :      /* otherwise */         raise(new TypeError('Type of property not supported: ' + value));
   }
 
-  function assignMeta(path, node, binding) {
-    const doc = getDocComment(node);
+  function setMeta(lvalue, meta) {
+    return t.assignmentExpression(
+      '=',
+      t.memberExpression(lvalue, metaSymbol(), COMPUTED),
+      objectToExpression(meta)
+    );
+  }
+
+  function assignMeta(binding, doc, path, additionalMeta) { // path, node, binding) {
     if (doc) {
-      const meta = parseDoc(doc);
-      path.insertAfter(
-        t.expressionStatement(
-          t.assignmentExpression(
-            '=',
-            t.memberExpression(binding, metaSymbol(), COMPUTED),
-            objectToExpression(meta)
-          )
-        )
-      );
+      const meta = Object.assign(parseDoc(doc), additionalMeta || {});
+      path.insertAfter(t.expressionStatement(setMeta(binding, meta)));
     }
   }
 
+  function wrapRValue(expr, meta, path, bindingName) {
+    const id = path.scope.generateUidIdentifier(bindingName || "ref");
+    path.scope.push({ id });
 
-  return {
-    visitor: {
-      FunctionDeclaration(path, state) {
-        assignMeta(path, path.node, t.identifier(path.node.id.name));
-      },
+    return t.sequenceExpression([
+      t.assignmentExpression('=', id, expr),
+      setMeta(id, meta),
+      id
+    ]);
+  }
 
-      VariableDeclaration(path, state) {
-        if (path.node.declarations.length === 1) {
-          const declarator = path.node.declarations[0];
-          assignMeta(path, path.node, t.identifier(declarator.id.name));
+
+  const visitor = {
+    FunctionDeclaration(path, state) {
+      assignMeta(path.node.id, getDocComment(path.node), path, {
+        name: path.node.id.name
+      });
+    },
+
+    VariableDeclaration(path, state) {
+      if (path.node.declarations.length === 1) {
+        const declarator = path.node.declarations[0];
+        assignMeta(declarator.id, getDocComment(path.node), path, inferName(declarator.id));
+      }
+    },
+
+    ExpressionStatement(path, state) {
+      const expr = path.node.expression;
+      if (t.isAssignmentExpression(expr)) {
+        const doc = getDocComment(path.node);
+        if (doc) {
+          const inferredMeta = inferName(expr.left);
+          const meta = Object.assign(parseDoc(doc), inferredMeta);
+
+          expr.right = wrapRValue(expr.right, meta, path, inferredMeta.name);
         }
       }
+    },
+
+    ObjectProperty(path, state) {
+      const doc = getDocComment(path.node);
+      if (doc) {
+        const inferredMeta = inferName(path.node.key, path.node.computed);
+        const meta = Object.assign(parseDoc(doc), inferredMeta);
+
+        path.node.value = wrapRValue(path.node.value, meta, path, inferredMeta.name);
+      }
+    },
+
+    ObjectMethod(path, state) {
+      const inferredMeta = inferName(path.node.key, path.node.computed);
+      const fn = t.functionExpression(
+        path.node.computed? null : path.node.key,
+        path.node.params,
+        path.node.body,
+        path.node.generator,
+        path.node.async
+      );
+
+      // Babel will invoke ObjectProperty on this newly created node
+      // This is a problem :<
+      path.replaceWith(
+        t.objectProperty(path.node.key, fn, path.node.computed)
+      );
     }
   };
+
+  return { visitor };
 };

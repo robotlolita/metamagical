@@ -116,7 +116,7 @@ module.exports = function({ types: t }) {
 
   function assignMeta(binding, doc, path, additionalMeta) { // path, node, binding) {
     if (doc) {
-      const meta = Object.assign(parseDoc(doc), additionalMeta || {});
+      const meta = Object.assign(additionalMeta || {}, parseDoc(doc));
       path.insertAfter(t.expressionStatement(setMeta(binding, meta)));
     }
   }
@@ -153,7 +153,7 @@ module.exports = function({ types: t }) {
         const doc = getDocComment(path.node);
         if (doc) {
           const inferredMeta = inferName(expr.left);
-          const meta = Object.assign(parseDoc(doc), inferredMeta);
+          const meta = Object.assign(inferredMeta, parseDoc(doc));
 
           expr.right = wrapRValue(expr.right, meta, path, inferredMeta.name);
         }
@@ -164,7 +164,7 @@ module.exports = function({ types: t }) {
       const doc = getDocComment(path.node);
       if (doc) {
         const inferredMeta = inferName(path.node.key, path.node.computed);
-        const meta = Object.assign(parseDoc(doc), inferredMeta);
+        const meta = Object.assign(inferredMeta, parseDoc(doc));
 
         path.node.value = wrapRValue(path.node.value, meta, path, inferredMeta.name);
       }

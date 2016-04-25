@@ -67,12 +67,94 @@ function inheritedMeta(m, name) {
   }
 }
 
-function getObjectMeta(object) {
+function isObject(a) {
+  return Object(a) === a;
+}
+
+function compact(source) {
+  var result = {};
+  Object.keys(source).forEach(function(key) {
+    var value = source[key];
+    if (value != null)  result[key] = value;
+  });
+  return result;
+}
+
+function unique(xs) {
+  return Array.from(new Set(xs));
+}
+
+function maybeExtend(target, source) {
+  return extend(target, compact(source));
+}
+
+function extendMerging(target, source) {
+  Object.keys(source).forEach(function(key) {
+    var value = source[key];
+    if (value != null) {
+      if (mergingStrategy[key]) {
+        if (target[key] == null) {
+          target[key] = value;
+        } else {
+          target[key] = mergingStrategy[key](target[key], value);
+        }
+      }
+    }
+  });
+}
+
+var mergingStrategy = {
+  authors(l, r) {
+    return unique(l.concat(r));
+  },
+
+  platforms(l, r) {
+    return unique(l.concat(r));
+  },
+
+  stability(l, r) {
+    var il = Stability[l].index;
+    var ir = Stability[r].index;
+
+    return il < ir?    l
+    :      /* else */  r;
+  },
+
+  portability(l, r) {
+    return l !== "portable" || r !== "portable"?  "not portable"
+    :      /* otherwise */                        "portable";
+  }
+};
+
+function collectChildMeta(value) {
+  var visited = new Set();
+  var meta = {};
+
+  function metaForChild(source) {
+    if (isObject(source) && !visited.has(source)) {
+      visited.add(source);
+      Object.keys(source).forEach(function(key) {
+        var value = source[key];
+        if (isObject(value)) {
+          var childMeta = rawGetObjectMeta(value);
+          extendMerging(meta, childMeta);
+          visited.add(value);
+          metaForChild(value);
+        }
+      });
+    }
+  }
+
+  metaForChild(value);
+  return meta;
+}
+
+function rawGetObjectMeta(object) {
   if (Object(object) !== object) {
     return {};
   }
   var meta = mm.get(object);
-  return extend(meta, {
+  return maybeExtend(meta, {
     authors     : inheritedMeta(meta, 'authors'),
     licence     : inheritedMeta(meta, 'licence'),
     since       : inheritedMeta(meta, 'since'),
@@ -81,6 +163,10 @@ function getObjectMeta(object) {
     stability   : inheritedMeta(meta, 'stability'),
     portability : inheritedMeta(meta, 'portability')
   });
+}
+
+function getObjectMeta(object) {
+  return extend(collectChildMeta(object), rawGetObjectMeta(object));
 }
 
 function signature(meta) {

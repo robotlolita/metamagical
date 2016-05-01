@@ -3,6 +3,7 @@
   "plugins": [
     "transform-metamagical-comments",
     "transform-function-bind",
-    "transform-object-rest-spread"
+    "transform-object-rest-spread",
+    "transform-assert-comments"
   ]
 }

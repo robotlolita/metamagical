@@ -1,0 +1,15 @@
+{
+  "name": "babel-plugin-transform-assertion-comments",
+  "version": "0.1.0",
+  "description": "Compile assertion comments to runtime assertions.",
+  "license": "MIT",
+  "main": "./lib/index.js",
+  "keywords": [
+    "babel-plugin"
+  ],
+  "dependencies": {
+    "babel-generator": "^6.7.7",
+    "babel-template": "^6.7.0",
+    "babylon": "^6.7.0"
+  }
+}

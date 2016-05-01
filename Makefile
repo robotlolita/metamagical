@@ -1,43 +1,59 @@
-.DEFAULT_GOAL = help
-
-bin   := $(shell npm bin)
-babel := $(bin)/babel
-
-
-# -- [ CONFIGURATION ] -------------------------------------------------
-SRC_DIR := src
-TGT_DIR := lib
-SRC := $(shell find $(SRC_DIR)/ -name '*.js')
-TGT := ${SRC:$(SRC_DIR)/%=$(TGT_DIR)/%}
-
-
-# -- [ COMPILATION ] ---------------------------------------------------
-$(TGT_DIR)/%: $(SRC_DIR)/%
-	mkdir -p $(dir $@)
-	$(babel) --source-map inline --out-file $@ $<
-
-node_modules: package.json
-	npm install
-
-
-# -- [ TASKS ] ---------------------------------------------------------
 help:
 	@echo ""
 	@echo "AVAILABLE TASKS"
 	@echo ""
-	@echo "  compile .......... Compiles the project."
-	@echo "  clean ............ Removes build artifacts."
-	@echo "  test ............. Runs the tests for the project."
+	@echo "  compile ................ Compiles the project."
+	@echo "  clean .................. Removes build artifacts."
+	@echo "  test ................... Runs the tests for the project."
+	@echo "  test-watch ............. Runs the tests on every change."
+	@echo "  lint ................... Lints all source files."
 	@echo ""
 
 
-compile: node_modules $(TGT)
-
-clean:
-	rm -f $(TGT)
-
-test:
-	exit 1
+# ----------------------------------------------------------------------
+bin    := $(shell npm bin)
+babel  := $(bin)/babel
+eslint := $(bin)/eslint
+mocha  := $(bin)/mocha
 
 
-.PHONY: help compile clean test
+# -- [ CONFIGURATION ] -------------------------------------------------
+PACKAGES := $(wildcard packages/*)
+
+
+# -- [ TASKS ] ---------------------------------------------------------
+.PHONY: help compile compile-test clean test lint test-watch
+
+node_modules: package.json
+	npm install
+
+compile: $(PACKAGES)
+	for package in $(PACKAGES); do \
+	  if [ -d $$package/src ]; then\
+	    $(babel) $$package/src --source-map inline \
+	                           --out-dir    $$package/lib \
+	                           $(BABEL_OPTIONS); \
+	  fi; \
+	done; \
+
+# compile-test:
+# 	$(babel) test/src --source-map inline \
+# 	                  --out-dir    test/spec \
+# 	                  $(BABEL_OPTIONS)
+# 
+# clean:
+# 	rm -rf lib test/spec
+# 
+# test: compile compile-test
+# 	$(mocha) test/spec --reporter spec \
+# 	                   --ui       bdd
+# 
+# test-watch: compile compile-test
+# 	BABEL_OPTIONS=--watch $(MAKE) compile &
+# 	BABEL_OPTIONS=--watch $(MAKE) compile-test &
+# 	$(mocha) test/spec --reporter min \
+# 	                   --ui       bdd \
+# 	                   --watch
+
+lint:
+	$(eslint) .

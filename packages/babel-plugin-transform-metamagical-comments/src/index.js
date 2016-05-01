@@ -171,20 +171,29 @@ module.exports = function({ types: t }) {
     },
 
     ObjectMethod(path, state) {
-      const inferredMeta = inferName(path.node.key, path.node.computed);
-      const fn = t.functionExpression(
-        path.node.computed? null : path.node.key,
-        path.node.params,
-        path.node.body,
-        path.node.generator,
-        path.node.async
-      );
+      const doc = getDocComment(path.node);
+      if (doc) {
+        if (!path.node.method) {
+          console.warn('Getters and setters are not supported in Meta:Magical\'s babel plugin.');
+          return;
+        }
 
-      // Babel will invoke ObjectProperty on this newly created node
-      // This is a problem :<
-      path.replaceWith(
-        t.objectProperty(path.node.key, fn, path.node.computed)
-      );
+        const inferredMeta = inferName(path.node.key, path.node.computed);
+        const fn = t.functionExpression(
+          path.node.computed? null : path.node.key,
+          path.node.params,
+          path.node.body,
+          path.node.generator,
+          path.node.async
+        );
+
+        // Babel will invoke ObjectProperty on this newly created node
+        // This is a problem :<
+        path.replaceWith(
+          t.objectProperty(path.node.key, fn, path.node.computed)
+
+        );
+      }
     }
   };
 

@@ -1,3 +1,0 @@
-Meta:Magical Changelog
-======================
-

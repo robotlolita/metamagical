@@ -2,20 +2,21 @@
 //
 // This source file is part of the Meta:Magical project.
 //
-// Copyright (C) 2015-2016 Quildreen Motta.
-// Licensed under the MIT licence.
-//
 // See LICENCE for licence information.
 // See CONTRIBUTORS for the list of contributors to the project.
 //
 //----------------------------------------------------------------------
 
+
+// -- DEPENDENCIES -----------------------------------------------------
 const yaml = require('js-yaml');
 
 
+// -- CONSTANTS --------------------------------------------------------
 const COMPUTED = true; /* computed properties */
 
 
+// -- HELPERS ----------------------------------------------------------
 function isDocComment(comment) {
   return comment.type === 'CommentBlock'
   &&     /^~\s*$/m.test(comment.value);
@@ -67,7 +68,10 @@ function isObject(value) {
 }
 
 
+// -- IMPLEMENTATION ---------------------------------------------------
 module.exports = function({ types: t }) {
+
+  // --- HELPERS -------------------------------------------------------
   function metaSymbol() {
     return t.callExpression(
       t.memberExpression(
@@ -79,9 +83,9 @@ module.exports = function({ types: t }) {
   }
 
   function inferName(id, computed) {
-    return t.isIdentifier(id) && !computed?  { name: id.name }
-    :      t.isMemberExpression(id)?         inferName(id.property, id.computed)
-    :      /* otherwise */                   {};
+    return t.isIdentifier(id) && !computed ?  { name: id.name }
+    :      t.isMemberExpression(id)        ?  inferName(id.property, id.computed)
+    :      /* otherwise */                    {};
   }
 
   function objectToExpression(object) {
@@ -103,7 +107,7 @@ module.exports = function({ types: t }) {
     :      isBoolean(value)     ?  t.booleanLiteral(value)
     :      isNumber(value)      ?  t.numericLiteral(value)
     :      isObject(value)      ?  objectToExpression(value)
-    :      /* otherwise */         raise(new TypeError('Type of property not supported: ' + value));
+    :      /* otherwise */         raise(new TypeError(`Type of property not supported: ${value}`));
   }
 
   function setMeta(lvalue, meta) {
@@ -114,7 +118,7 @@ module.exports = function({ types: t }) {
     );
   }
 
-  function assignMeta(binding, doc, path, additionalMeta) { // path, node, binding) {
+  function assignMeta(binding, doc, path, additionalMeta) {
     if (doc) {
       const meta = Object.assign(additionalMeta || {}, parseDoc(doc));
       path.insertAfter(t.expressionStatement(setMeta(binding, meta)));
@@ -122,7 +126,7 @@ module.exports = function({ types: t }) {
   }
 
   function wrapRValue(expr, meta, path, bindingName) {
-    const id = path.scope.generateUidIdentifier(bindingName || "ref");
+    const id = path.scope.generateUidIdentifier(bindingName || 'ref');
     path.scope.push({ id });
 
     return t.sequenceExpression([
@@ -133,21 +137,22 @@ module.exports = function({ types: t }) {
   }
 
 
+  // --- PUBLIC TRANSFORM ----------------------------------------------
   const visitor = {
-    FunctionDeclaration(path, state) {
+    FunctionDeclaration(path, _state) {
       assignMeta(path.node.id, getDocComment(path.node), path, {
         name: path.node.id.name
       });
     },
 
-    VariableDeclaration(path, state) {
+    VariableDeclaration(path, _state) {
       if (path.node.declarations.length === 1) {
         const declarator = path.node.declarations[0];
         assignMeta(declarator.id, getDocComment(path.node), path, inferName(declarator.id));
       }
     },
 
-    ExpressionStatement(path, state) {
+    ExpressionStatement(path, _state) {
       const expr = path.node.expression;
       if (t.isAssignmentExpression(expr)) {
         const doc = getDocComment(path.node);
@@ -160,7 +165,7 @@ module.exports = function({ types: t }) {
       }
     },
 
-    ObjectProperty(path, state) {
+    ObjectProperty(path, _state) {
       const doc = getDocComment(path.node);
       if (doc) {
         const inferredMeta = inferName(path.node.key, path.node.computed);
@@ -170,21 +175,29 @@ module.exports = function({ types: t }) {
       }
     },
 
-    ObjectMethod(path, state) {
-      const inferredMeta = inferName(path.node.key, path.node.computed);
-      const fn = t.functionExpression(
-        path.node.computed? null : path.node.key,
-        path.node.params,
-        path.node.body,
-        path.node.generator,
-        path.node.async
-      );
+    ObjectMethod(path, _state) {
+      const doc = getDocComment(path.node);
+      if (doc) {
+        if (!path.node.method) {
+          console.warn('Getters and setters are not supported in Meta:Magical\'s babel plugin.');
+          return;
+        }
 
-      // Babel will invoke ObjectProperty on this newly created node
-      // This is a problem :<
-      path.replaceWith(
-        t.objectProperty(path.node.key, fn, path.node.computed)
-      );
+        const fn = t.functionExpression(
+          path.node.computed ?  null : path.node.key,
+          path.node.params,
+          path.node.body,
+          path.node.generator,
+          path.node.async
+        );
+
+        // Babel will invoke ObjectProperty on this newly created node
+        // This is a problem :<
+        path.replaceWith(
+          t.objectProperty(path.node.key, fn, path.node.computed)
+
+        );
+      }
     }
   };
 

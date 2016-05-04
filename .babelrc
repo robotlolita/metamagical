@@ -1,6 +1,8 @@
 {
-    "presets": ["es2015"],
-    "plugins": ["transform-async-to-generator",
-                "transform-function-bind",
-                "transform-object-rest-spread"]
+  "presets": ["es2015"],
+  "plugins": [
+    "transform-metamagical-comments",
+    "transform-function-bind",
+    "transform-object-rest-spread"
+  ]
 }

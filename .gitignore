@@ -1,4 +1,3 @@
 node_modules/
 *.tern-port
 lib/
-/babel-plugin/index.js

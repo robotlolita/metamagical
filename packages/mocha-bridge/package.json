@@ -1,0 +1,19 @@
+{
+  "name": "metamagical-mocha-bridge",
+  "version": "0.1.0",
+  "description": "Allows defining Mocha test cases from Meta:Magical examples.",
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/origamitower/metamagical.git"
+  },
+  "keywords": [
+    "mocha",
+    "testing"
+  ],
+  "author": "Quildreen Motta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/origamitower/metamagical/issues"
+  }
+}

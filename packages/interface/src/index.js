@@ -115,8 +115,8 @@ module.exports = Refinable.refine({
 
     portability(xs) {
       return xs.reduce((l, r) => {
-        return l !== "portable" || r !== "portable" ?  "not portable"
-        :      /* otherwise */                         "portable";
+        return l !== 'portable' || r !== 'portable' ?  'not portable'
+        :      /* otherwise */                         'portable';
       });
     }
   },

@@ -42,11 +42,11 @@ module.exports = {
    */
   assertObject(value) {
     if (Object(value) !== value) {
-      var kind = value === null?       'null'
-      :          value === undefined?  'undefined'
-      :          /* otherwise */       'a primitive value (' + JSON.stringify(value) + ')';
+      const kind = value === null      ?  'null'
+      :            value === undefined ?  'undefined'
+      :            /* otherwise */        `a primitive value (${JSON.stringify(value)})`;
 
-      throw new TypeError("Meta:Magical can only associate meta-data with objects, but you're trying to use " + kind);
+      throw new TypeError(`Meta:Magical can only associate meta-data with objects, but you're trying to use ${kind}`);
     }
   }
 };

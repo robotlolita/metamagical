@@ -37,7 +37,7 @@ function getDocComment(node) {
 
 function parseDoc(doc) {
   const parts = doc.replace(/^~[ \t]*$/m, '')
-                 .replace(/^[ \t]*\*[ \t]/gm, '')
+                 .replace(/^[ \t]*\*[ \t]?/gm, '')
                  .split(/\n[ \t]*-{3,}[ \t]*\n/);
 
   let meta = yaml.safeLoad(parts[1] || '') || {};
@@ -79,7 +79,7 @@ function inferExampleName(node) {
   if (!node || node.type !== 'heading') {
     return null;
   } else {
-    return node.text.replace(/::\s*$/, '');
+    return node.text.replace(/::[ \t]*$/m, '');
   }
 }
 
@@ -171,7 +171,7 @@ module.exports = function({ types: t }) {
       '=',
       t.memberExpression(lvalue, metaSymbol(), COMPUTED),
       objectToExpression(Object.assign(meta, inferExamples(meta.documentation), {
-        documentation: meta.documentation.replace(/^::$/gm, '').replace(/::\s*$/gm, ':')
+        documentation: meta.documentation.replace(/^::$/gm, '').replace(/::[ \t]*$/gm, ':')
       }))
     );
   }

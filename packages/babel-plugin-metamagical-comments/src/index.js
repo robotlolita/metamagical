@@ -9,7 +9,9 @@
 
 
 // -- DEPENDENCIES -----------------------------------------------------
-const yaml = require('js-yaml');
+const yaml      = require('js-yaml');
+const marked    = require('marked');
+const { parse } = require('babylon');
 
 
 // -- CONSTANTS --------------------------------------------------------
@@ -67,6 +69,35 @@ function isObject(value) {
   return Object(value) === value;
 }
 
+function isExampleLeadingParagraph(node) {
+  return node
+  &&     (node.type === 'paragraph' || node.type === 'heading')
+  &&     /::\s*$/.test(node.text)
+}
+
+function inferExampleName(node) {
+  if (!node || node.type !== 'heading') {
+    return null;
+  } else {
+    return node.text.replace(/::\s*$/, '');
+  }
+}
+
+function collectExamples(documentation) {
+  const ast = marked.lexer(documentation);
+  
+  return ast.map((node, i) => [node, ast[i - 1]])
+            .filter(([node, prev]) => node.type === 'code' && isExampleLeadingParagraph(prev))
+            .map(([node, previous]) => ({ 
+              source: node.text, 
+              name: inferExampleName(previous) 
+            }));
+}
+
+function Raw(value) {
+  this.value = value;
+}
+
 
 // -- IMPLEMENTATION ---------------------------------------------------
 module.exports = function({ types: t }) {
@@ -81,11 +112,35 @@ module.exports = function({ types: t }) {
       [t.stringLiteral('@@meta:magical')]
     );
   }
+  
+  function intoExampleFunction(ast) {
+    const body = ast.program.body;
+    
+    return new Raw(t.functionExpression(
+      null,   // id
+      [],     // params
+      t.blockStatement(body),
+      false,  // generator
+      false   // async
+    ));
+  }
+  
+  function parseExample({ name, source }) {
+    return name       ?  { name, call: intoExampleFunction(parse(source)) }
+    :      /* else */    intoExampleFunction(parse(source));
+  }
 
   function inferName(id, computed) {
     return t.isIdentifier(id) && !computed ?  { name: id.name }
     :      t.isMemberExpression(id)        ?  inferName(id.property, id.computed)
     :      /* otherwise */                    {};
+  }
+  
+  function inferExamples(documentation) {
+    const examples = collectExamples(documentation || '');
+
+    return examples.length > 0?  { examples: examples.map(parseExample) }
+    :      /* otherwise */       { };
   }
 
   function objectToExpression(object) {
@@ -102,7 +157,8 @@ module.exports = function({ types: t }) {
   }
 
   function valueToLiteral(value) {
-    return Array.isArray(value) ?  t.arrayExpression(value.map(valueToLiteral))
+    return value instanceof Raw ?  value.value
+    :      Array.isArray(value) ?  t.arrayExpression(value.map(valueToLiteral))
     :      isString(value)      ?  t.stringLiteral(value)
     :      isBoolean(value)     ?  t.booleanLiteral(value)
     :      isNumber(value)      ?  t.numericLiteral(value)
@@ -114,7 +170,9 @@ module.exports = function({ types: t }) {
     return t.assignmentExpression(
       '=',
       t.memberExpression(lvalue, metaSymbol(), COMPUTED),
-      objectToExpression(meta)
+      objectToExpression(Object.assign(meta, inferExamples(meta.documentation), {
+        documentation: meta.documentation.replace(/^::$/gm, '').replace(/::\s*$/gm, ':')
+      }))
     );
   }
 

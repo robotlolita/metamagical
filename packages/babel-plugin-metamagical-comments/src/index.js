@@ -36,9 +36,9 @@ function getDocComment(node) {
 }
 
 function parseDoc(doc) {
-  const parts = doc.replace(/^~\s*$/m, '')
-                 .replace(/^\s*\*\s/gm, '')
-                 .split(/\n\s*-{3,}\s*\n/);
+  const parts = doc.replace(/^~[ \t]*$/m, '')
+                 .replace(/^[ \t]*\*[ \t]/gm, '')
+                 .split(/\n[ \t]*-{3,}[ \t]*\n/);
 
   let meta = yaml.safeLoad(parts[1] || '') || {};
   meta.documentation = parts[0] || '';

@@ -33,7 +33,7 @@ function assertEquals(assert, actual, expected, message) {
   const keys          = Object.keys;
 
   function isSetoid(value) {
-    return value 
+    return value
     &&     typeof value.equals === 'function';
   }
 
@@ -86,7 +86,7 @@ function assertEquals(assert, actual, expected, message) {
     :      isRecord(r)            ?  compareRecord(l, r)
     :      /* otherwise */           assert.deepStrictEqual(l, r, message);
   }
-  
+
   compare(actual, expected);
 }
 
@@ -143,7 +143,7 @@ module.exports = function({ types: t }) {
     assertEqualsFD.params,
     assertEqualsFD.body
   );
-  
+
   function makeSymbol(name) {
     return t.callExpression(
       t.memberExpression(
@@ -153,15 +153,15 @@ module.exports = function({ types: t }) {
       [t.stringLiteral(name)]
     );
   }
-  
+
   function makeRest() {
     return makeSymbol('@@meta:magical:assertion-rest');
   }
-  
+
   function makeAssertionType() {
     return makeSymbol('@@meta:magical:assertion-type');
   }
-  
+
   function transformSpread(ast) {
     traverse(ast, {
       enter(path) {
@@ -171,17 +171,19 @@ module.exports = function({ types: t }) {
               path.replaceWith(makeRest());
             }
             break;
-            
+
+          case 'ObjectExpression':
+            path.node.properties.push(
+              t.objectProperty(makeAssertionType(), t.stringLiteral('record'), true)
+            );
+            break;
+
           case 'SpreadProperty':
-            if (path.node.argument.name === "_") { 
-              path.replaceWithMultiple([
-                t.objectProperty(makeAssertionType(), t.stringLiteral('record'), true),
-                t.objectProperty(makeRest(), t.booleanLiteral(true), true)
-              ]);
-              
+            if (path.node.argument.name === "_") {
+              path.replaceWith(t.objectProperty(makeRest(), t.booleanLiteral(true), true));
             }
             break;
-        } 
+        }
       }
     });
     return ast;
@@ -216,8 +218,8 @@ module.exports = function({ types: t }) {
     return comment && isAssertion(comment) ?  parseAssertion(comment.value)
     :      /* otherwise */                    null;
   }
-  
-  
+
+
   return {
     visitor: {
       ExpressionStatement(path, state) {
@@ -227,7 +229,7 @@ module.exports = function({ types: t }) {
         if (assertion) {
           if (!path.scope.hasBinding('metamagical_assert_equals')) {
             path.scope.push({
-              id: t.identifier('metamagical_assert_equals'), 
+              id: t.identifier('metamagical_assert_equals'),
               init: assertEqualsAST
             });
           }

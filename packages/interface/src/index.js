@@ -114,10 +114,14 @@ module.exports = Refinable.refine({
     },
 
     portability(xs) {
-      return xs.reduce((l, r) => {
-        return l !== 'portable' || r !== 'portable' ?  'not portable'
-        :      /* otherwise */                         'portable';
-      });
+      if (xs.length === 0) {
+        return null;
+      } else {
+        return xs.reduce((l, r) => {
+          return l !== 'portable' || r !== 'portable' ?  'not portable'
+          :      /* otherwise */                         'portable';
+        });
+      }
     }
   },
 
@@ -166,12 +170,12 @@ module.exports = Refinable.refine({
       }
     };
 
-    const merge  = this.mergingStrategy[field];
-    const values = this.get(field).map(x => [x]).getOrElse([])
-                       .concat(metaFrom(this));
+    const merge     = this.mergingStrategy[field];
+    const collected = this.get(field).map(x => [x]).getOrElse([])
+                          .concat(metaFrom(this));
 
-    return merge ?     merge(values)
-    :      /* else */  values;
+    return merge ?     merge(collected)
+    :      /* else */  collected;
   },
 
   /*~

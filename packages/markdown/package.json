@@ -1,0 +1,28 @@
+{
+  "name": "metamagical-markdown",
+  "version": "0.1.0",
+  "description": "Compiles Markdown to JS modules annotated with Meta:Magical.",
+  "main": "./lib/index.js",
+  "bin": {
+    "metamagical-markdown": "bin/metamagical-markdown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/origamitower/metamagical.git"
+  },
+  "author": "Quildreen Motta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/origamitower/metamagical/issues"
+  },
+  "dependencies": {
+    "babel-core": "^6.8.0",
+    "babel-generator": "^6.8.0",
+    "babel-template": "^6.8.0",
+    "babel-types": "^6.8.1",
+    "babylon": "^6.8.0",
+    "docopt": "^0.6.2",
+    "js-yaml": "^3.6.0",
+    "marked": "^0.3.5"
+  }
+}

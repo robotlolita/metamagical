@@ -29,18 +29,21 @@ node_modules: package.json
 
 compile:
 	./Scripts/compile.sh "$$PACKAGES" "$(babel)" "$$BABEL_OPTIONS"
-	
+
 compile-assertion-comments:
 	PACKAGES=packages/babel-plugin-assertion-comments $(MAKE) compile
-	
+
 compile-metamagical-comments:
 	PACKAGES=packages/babel-plugin-metamagical-comments $(MAKE) compile
-	
+
 compile-interface:
 	PACKAGES=packages/interface $(MAKE) compile
 
 compile-mocha-bridge:
 	PACKAGES=packages/mocha-bridge $(MAKE) compile
+
+compile-markdown:
+	PACKAGES=packages/markdown $(MAKE) compile
 
 clean:
 	rm -r packages/**/lib

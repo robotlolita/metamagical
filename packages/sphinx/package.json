@@ -1,0 +1,23 @@
+{
+  "name": "metamagical-sphinx",
+  "version": "0.1.0",
+  "description": "Generates Sphinx documentation from documentation metadata.",
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/origamitower/metamagical.git"
+  },
+  "author": "Quildreen Motta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/origamitower/metamagical/issues"
+  },
+  "dependencies": {
+    "babel-generator": "^6.8.0",
+    "babel-polyfill": "^6.8.0",
+    "babel-types": "^6.8.1",
+    "babylon": "^6.8.0",
+    "folktale": "github:origamitower/folktale",
+    "marked": "^0.3.5"
+  }
+}

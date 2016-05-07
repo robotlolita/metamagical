@@ -45,6 +45,9 @@ compile-mocha-bridge:
 compile-markdown:
 	PACKAGES=packages/markdown $(MAKE) compile
 
+compile-sphinx:
+	PACKAGES=packages/sphinx $(MAKE) compile
+
 clean:
 	rm -r packages/**/lib
 

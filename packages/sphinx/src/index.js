@@ -14,6 +14,7 @@ const { Just, Nothing } = require('folktale/data/maybe');
 const generateJs = require('babel-generator').default;
 const parseJs    = require('babylon').parse;
 const t          = require('babel-types');
+const marked     = require('marked');
 
 
 // -- ALIASES ----------------------------------------------------------
@@ -37,6 +38,15 @@ function mapObject(object, transform) {
   return result;
 }
 
+function synopsis(doc) {
+  const tokens = marked.lexer(doc).filter(t => t.type === 'paragraph');
+  if (tokens.length > 0) {
+    return tokens[0].text;
+  } else {
+    return '';
+  }
+}
+
 function ownProperties(object) {
   const props = ownProperties_(object);
 
@@ -45,6 +55,10 @@ function ownProperties(object) {
   } else {
     return props;
   }
+}
+
+function replaceMarkdownHeading(text) {
+  return text.replace(/^[ \t]*#+[ \t](.+?)$/mg, '\n.. rubric:: $1\n\n');
 }
 
 async function shell(originalCommand, args, options) {
@@ -130,9 +144,9 @@ function groupedProperties(options, meta, object) {
                .map(key => [key, object[key]])
                .filter(maybeSkipUndocumented)
                .sort(([k1, _], [k2, __]) => compare(k1, k2))
-               .map(([k, value]) => {
-                 const [name, kind, property] = describeProperty(getProperty(object, k), k);
-                 return { name, kind, property, value }
+               .map(([key, value]) => {
+                 const [name, kind, property] = describeProperty(getProperty(object, key), key);
+                 return { key, name, kind, property, value }
                });
   return groupBy(ps, category).map(([category, members]) => ({ category, members }))
                               .sort((a, b) => compare(a.category, b.category));
@@ -156,7 +170,7 @@ function link(title, doc) {
   return Directive(
     'rst-class', 'detail-link',
     null,
-    Text(`:doc:${title}<${doc}>`)
+    Text(`:doc:\`${title}<${doc}>\``)
   );
 }
 
@@ -257,8 +271,10 @@ function toParameters(prefix, object) {
   return object;
 }
 
-async function renderMember(meta, { name, kind, property, value }) {
-  const doc = meta.get('documentation').getOrElse(null);
+async function renderMember(options, meta, { key, name, kind, property, value }) {
+  const doc    = meta.get('documentation').getOrElse(null);
+  const skip   = options.skipDetailedPage || new Set();
+  const prefix = options.linkPrefix || '';
 
   return Block([
     Text('.. rst-class:: hidden-heading'),
@@ -278,7 +294,17 @@ async function renderMember(meta, { name, kind, property, value }) {
         meta.get('type').map(renderType).getOrElse(null)
       ]))
     ),
-    Text(doc ? (await markdownToRST(doc, 5)) : '')
+    skip.has(name) ? Text(doc ? (await markdownToRST(replaceMarkdownHeading(doc), 5)) : '')
+    : /* else */     Block([
+                       Text(doc ? (await markdownToRST(synopsis(doc))) : ''),
+                       link('+', `${prefix}${key}`),
+                       Directive(
+                         'toctree',
+                         '',
+                         Options({ 'hidden': '' }),
+                         Block([Text(`${prefix}${key}`)])
+                       )
+                     ])
   ]);
 }
 
@@ -311,7 +337,7 @@ async function properties(meta, options, prefix) {
       Title(`${prefix || 'Properties in'} ${meta.get('name').getOrElse('(Anonymous)')}`, 2),
       Block(await Promise.all(props.map(async ({ category, members }) => Block([
         Title(category || 'Uncategorised', 3),
-        Block(await Promise.all(members.map(m => renderMember(meta.forObject(intoObject(m.value)), m))))
+        Block(await Promise.all(members.map(m => renderMember(options, meta.forObject(intoObject(m.value)), m))))
       ])))),
       await inheritedProperties(meta, options)
     ]);

@@ -49,7 +49,7 @@ function render(node) {
 }
 
 function renderItem([key, value]) {
-  if (!value) {
+  if (value == null) {
     return '';
   } else {
     return `:${key}: ${lines(value).join(' ')}`;

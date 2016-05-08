@@ -19,6 +19,10 @@ const COMPUTED = true; /* computed properties */
 
 
 // -- HELPERS ----------------------------------------------------------
+function merge(...args) {
+  return Object.assign({}, ...args);
+}
+
 function isDocComment(comment) {
   return comment.type === 'CommentBlock'
   &&     /^~\s*$/m.test(comment.value);
@@ -85,12 +89,12 @@ function inferExampleName(node) {
 
 function collectExamples(documentation) {
   const ast = marked.lexer(documentation);
-  
+
   return ast.map((node, i) => [node, ast[i - 1]])
             .filter(([node, prev]) => node.type === 'code' && isExampleLeadingParagraph(prev))
-            .map(([node, previous]) => ({ 
-              source: node.text, 
-              name: inferExampleName(previous) 
+            .map(([node, previous]) => ({
+              source: node.text,
+              name: inferExampleName(previous)
             }));
 }
 
@@ -112,22 +116,22 @@ module.exports = function({ types: t }) {
       [t.stringLiteral('@@meta:magical')]
     );
   }
-  
-  function intoExampleFunction(ast) {
+
+  function intoExampleFunction(path, source, ast) {
     const body = ast.program.body;
-    
-    return new Raw(t.functionExpression(
+
+    return new Raw(wrapRValue(t.functionExpression(
       null,   // id
       [],     // params
       t.blockStatement(body),
       false,  // generator
       false   // async
-    ));
+    ), { source }, path.hub.file));
   }
-  
-  function parseExample({ name, source }) {
-    return name       ?  { name, call: intoExampleFunction(parse(source)) }
-    :      /* else */    intoExampleFunction(parse(source));
+
+  function parseExample(path, { name, source }) {
+    return name       ?  { name, call: intoExampleFunction(path, source, parse(source)) }
+    :      /* else */    intoExampleFunction(path, source, parse(source));
   }
 
   function inferName(id, computed) {
@@ -135,12 +139,19 @@ module.exports = function({ types: t }) {
     :      t.isMemberExpression(id)        ?  inferName(id.property, id.computed)
     :      /* otherwise */                    {};
   }
-  
-  function inferExamples(documentation) {
+
+  function inferExamples(path, documentation) {
     const examples = collectExamples(documentation || '');
 
-    return examples.length > 0?  { examples: examples.map(parseExample) }
+    return examples.length > 0?  { examples: examples.map(e => parseExample(path, e)) }
     :      /* otherwise */       { };
+  }
+
+  function inferSource(path) {
+    const code = path.hub.file.code;
+
+    return code       ?  { source: code.slice(path.node.start, path.node.end) }
+    :      /* else */    { }
   }
 
   function objectToExpression(object) {
@@ -166,20 +177,29 @@ module.exports = function({ types: t }) {
     :      /* otherwise */         raise(new TypeError(`Type of property not supported: ${value}`));
   }
 
-  function setMeta(lvalue, meta) {
-    return t.assignmentExpression(
-      '=',
-      t.memberExpression(lvalue, metaSymbol(), COMPUTED),
-      objectToExpression(Object.assign(meta, inferExamples(meta.documentation), {
-        documentation: meta.documentation.replace(/^::$/gm, '').replace(/::[ \t]*$/gm, ':')
-      }))
-    );
+  function setMeta(path, lvalue, meta) {
+    const doc = meta.documentation;
+    if (doc) {
+      return t.assignmentExpression(
+        '=',
+        t.memberExpression(lvalue, metaSymbol(), COMPUTED),
+        objectToExpression(Object.assign(meta, inferExamples(path, doc), {
+          documentation: doc.replace(/^::$/gm, '').replace(/::[ \t]*$/gm, ':')
+        }))
+      );
+    } else {
+      return t.assignmentExpression(
+        '=',
+        t.memberExpression(lvalue, metaSymbol(), COMPUTED),
+        objectToExpression(meta)
+      );
+    }
   }
 
   function assignMeta(binding, doc, path, additionalMeta) {
     if (doc) {
       const meta = Object.assign(additionalMeta || {}, parseDoc(doc));
-      path.insertAfter(t.expressionStatement(setMeta(binding, meta)));
+      path.insertAfter(t.expressionStatement(setMeta(path, binding, meta)));
     }
   }
 
@@ -189,7 +209,7 @@ module.exports = function({ types: t }) {
 
     return t.sequenceExpression([
       t.assignmentExpression('=', id, expr),
-      setMeta(id, meta),
+      setMeta(path, id, meta),
       id
     ]);
   }
@@ -198,15 +218,25 @@ module.exports = function({ types: t }) {
   // --- PUBLIC TRANSFORM ----------------------------------------------
   const visitor = {
     FunctionDeclaration(path, _state) {
-      assignMeta(path.node.id, getDocComment(path.node), path, {
-        name: path.node.id.name
-      });
+      assignMeta(
+        path.node.id,
+        getDocComment(path.node),
+        path,
+        merge({
+          name: path.node.id.name,
+        }, inferSource(path))
+      );
     },
 
     VariableDeclaration(path, _state) {
       if (path.node.declarations.length === 1) {
         const declarator = path.node.declarations[0];
-        assignMeta(declarator.id, getDocComment(path.node), path, inferName(declarator.id));
+        assignMeta(
+          declarator.id,
+          getDocComment(path.node),
+          path,
+          merge(inferName(declarator.id), inferSource(path))
+        );
       }
     },
 
@@ -216,7 +246,7 @@ module.exports = function({ types: t }) {
         const doc = getDocComment(path.node);
         if (doc) {
           const inferredMeta = inferName(expr.left);
-          const meta = Object.assign(inferredMeta, parseDoc(doc));
+          const meta = Object.assign(inferredMeta, inferSource(path), parseDoc(doc));
 
           expr.right = wrapRValue(expr.right, meta, path, inferredMeta.name);
         }
@@ -227,7 +257,7 @@ module.exports = function({ types: t }) {
       const doc = getDocComment(path.node);
       if (doc) {
         const inferredMeta = inferName(path.node.key, path.node.computed);
-        const meta = Object.assign(inferredMeta, parseDoc(doc));
+        const meta = Object.assign(inferredMeta, inferSource(path), parseDoc(doc));
 
         path.node.value = wrapRValue(path.node.value, meta, path, inferredMeta.name);
       }
@@ -253,7 +283,6 @@ module.exports = function({ types: t }) {
         // This is a problem :<
         path.replaceWith(
           t.objectProperty(path.node.key, fn, path.node.computed)
-
         );
       }
     }

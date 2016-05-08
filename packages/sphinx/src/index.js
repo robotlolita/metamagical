@@ -281,7 +281,11 @@ async function renderMember(options, meta, { key, name, kind, property, value })
     Text(''),
     Title(name, 4),
     Directive(
-      `js:${kind}`,
+      'py:currentmodule',
+      meta.get('module').getOrElse('(Global)')
+    ),
+    Directive(
+      `py:${kind}`,
       name,
       null,
       Block(compact([

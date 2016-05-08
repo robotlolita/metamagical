@@ -130,8 +130,8 @@ module.exports = function({ types: t }) {
   }
 
   function parseExample(path, { name, source }) {
-    return name       ?  { name, call: intoExampleFunction(path, source, parse(source)) }
-    :      /* else */    intoExampleFunction(path, source, parse(source));
+    return name       ?  { name, call: intoExampleFunction(path, source, parse(source)), inferred: true }
+    :      /* else */    { name: '', call: intoExampleFunction(path, source, parse(source)), inferred: true };
   }
 
   function inferName(id, computed) {

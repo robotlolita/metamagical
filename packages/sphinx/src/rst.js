@@ -17,8 +17,8 @@ const fills = [
   { fill: '*',  overline: true  },
   { fill: '=',  overline: false },
   { fill: '-',  overline: false },
+  { fill: '~',  overline: false },
   { fill: '^',  overline: false },
-  { fill: '"',  overline: false },
   { fill: '\'', overline: false }
 ];
 

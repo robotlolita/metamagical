@@ -196,11 +196,16 @@ function inferSource(object) {
   :      /* otherwise */                 Nothing();
 }
 
-function inferSourceWithoutWrapper(f, babelOptions) {
+function inferSourceWithoutWrapper(meta, f, babelOptions) {
   function getBody(node) {
     return Array.isArray(node)            ?  node
     :      node.type === 'BlockStatement' ?  node.body
     :      /* otherwise */                   (_ => { throw new Error("Invalid example.") });
+  }
+
+  const maybeSource = meta.forObject(f).get('source');
+  if (maybeSource.isJust) {
+    return maybeSource;
   }
 
   return inferSource(f).chain(source => {
@@ -270,6 +275,7 @@ function typeOf(value) {
   return typeof value === 'string'  ?  'String'
   :      typeof value === 'number'  ?  'Number'
   :      typeof value === 'boolean' ?  'Boolean'
+  :      typeof value === 'symbol'  ?  'Symbol'
   :      value === null             ?  'Null'
   :      value === undefined        ?  'Undefined'
   :      /* otherwise */               'Unknown';
@@ -284,11 +290,11 @@ function intoObject(value) {
                             };
 }
 
-async function properties(meta, prefix) {
+async function properties(meta, options, prefix) {
   const props = groupedProperties(meta, meta.object());
 
   if (props.length === 0) {
-    return await inheritedProperties(meta);
+    return await inheritedProperties(meta, options);
   } else {
     return Block([
       Title(`${prefix || 'Properties in'} ${meta.get('name').getOrElse('(Anonymous)')}`, 2),
@@ -296,18 +302,19 @@ async function properties(meta, prefix) {
         Title(category || 'Uncategorised', 3),
         Block(await Promise.all(members.map(m => renderMember(meta.forObject(intoObject(m.value)), m))))
       ])))),
-      await inheritedProperties(meta)
+      await inheritedProperties(meta, options)
     ]);
   }
 }
 
-async function inheritedProperties(meta) {
+async function inheritedProperties(meta, options) {
+  const skip   = options.excludePrototypes || new Set();
   const parent = prototypeOf(meta.object());
 
-  if (parent == null) {
+  if (parent == null || skip.has(parent)) {
     return Block([]);
   } else {
-    return await properties(meta.forObject(parent), 'Properties inherited from');
+    return await properties(meta.forObject(parent), options, 'Properties inherited from');
   }
 }
 
@@ -321,7 +328,7 @@ function getProperFunction(example) {
 }
 
 function examples(meta, babelOptions) {
-  const xs     = groupBy(meta.get('examples').getOrElse([]), x => x.name);
+  const xs     = groupBy(meta.get('examples').getOrElse([]).filter(x => !x.inferred), x => x.name);
   const unamed = flatten(xs.filter(([name, _]) => !name).map(([_, v]) => v));
   const named  = xs.filter(([name, _]) => name);
 
@@ -331,13 +338,13 @@ function examples(meta, babelOptions) {
     return Block([
       Title('Examples', 2),
       Block(compact(
-        unamed.map(f => inferSourceWithoutWrapper(getProperFunction(f), babelOptions)
+        unamed.map(f => inferSourceWithoutWrapper(meta, getProperFunction(f), babelOptions)
                           .map(renderCode)
                           .getOrElse(null))
       )),
       Block(compact(
         named.map(([category, examples]) => {
-          const rendered = compact(examples.map(f => inferSourceWithoutWrapper(getProperFunction(f), babelOptions)
+          const rendered = compact(examples.map(f => inferSourceWithoutWrapper(meta, getProperFunction(f), babelOptions)
                                                        .map(renderCode)
                                                        .getOrElse(null)));
 
@@ -355,7 +362,7 @@ function examples(meta, babelOptions) {
   }
 }
 
-async function renderToSphinx(meta, babelOptions) {
+async function renderToSphinx(meta, options, babelOptions) {
   return Block(compact([
     Title(meta.get('name').getOrElse('(Anonymous)')),
     meta.get('deprecated').map(renderDeprecation).getOrElse(null),
@@ -369,7 +376,7 @@ async function renderToSphinx(meta, babelOptions) {
     meta.get('type').map(renderType).getOrElse(null),
     Text(await markdownToRST(meta.get('documentation').getOrElse('(No documentation)')), 2),
     source(meta),
-    await properties(meta),
+    await properties(meta, options),
     examples(meta, babelOptions)
   ]));
 }
@@ -378,11 +385,11 @@ async function renderToSphinx(meta, babelOptions) {
 // -- IMPLEMENTATION ---------------------------------------------------
 module.exports = function(meta, babelOptions) {
 
-  async function generateOne(object) {
+  async function generateOne(object, options) {
     const m = meta.forObject(object);
     return {
       name: m.get('name').getOrElse('(Anonymous)'),
-      content: (await renderToSphinx(m, babelOptions)).render()
+      content: (await renderToSphinx(m, options, babelOptions)).render()
     };
   }
 

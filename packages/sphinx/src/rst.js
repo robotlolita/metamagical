@@ -52,9 +52,7 @@ function renderItem([key, value]) {
   if (!value) {
     return '';
   } else {
-    const values = lines(value).map(line => pad(line, 2));
-
-    return `:${key}:\n${values.join('\n')}`;
+    return `:${key}: ${lines(value).join(' ')}`;
   }
 }
 
@@ -68,7 +66,6 @@ function getTitle(title, level) {
     return [Text(title), Text(line)];
   }
 }
-
 
 // -- IMPLEMENTATION ---------------------------------------------------
 const RST = data('metamagical:sphinx:rst', {

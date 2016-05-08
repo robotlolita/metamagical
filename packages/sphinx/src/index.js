@@ -8,7 +8,6 @@
 //----------------------------------------------------------------------
 
 // -- DEPENDENCIES -----------------------------------------------------
-require('babel-polyfill');
 const { exec } = require('child_process');
 const { Text, Sequence, Block, Options, Directive, Title } = require('./rst');
 const { Just, Nothing } = require('folktale/data/maybe');
@@ -24,6 +23,20 @@ const getProperty    = Object.getOwnPropertyDescriptor;
 const prototypeOf    = Object.getPrototypeOf;
 
 // -- HELPERS ----------------------------------------------------------
+function unique(xs) {
+  return Array.from(new Set(xs));
+}
+
+function mapObject(object, transform) {
+  let result = {};
+
+  keys(object).forEach(key => {
+    result[key] = transform(object[key]);
+  });
+
+  return result;
+}
+
 function ownProperties(object) {
   const props = ownProperties_(object);
 
@@ -163,7 +176,8 @@ function maybeMeta(meta) {
     'Portability': fromNullable(meta.getPropagated('portability')),
     'Platforms':   meta.get('platforms').map(x => x.join(', ')),
     'Maintainers': meta.get('maintainers').map(x => x.join(', ')),
-    'Authors':     fromNullable(meta.getPropagated('authors')).map(x => x.join(', '))
+    'Authors':     fromNullable(meta.getPropagated('authors'))
+                     .map(x => unique(flatten(x)).join(', '))
   });
 }
 

@@ -110,14 +110,25 @@ function describeProperty(p, name) {
   :      /* otherwise */                    [name,              'data',      p];
 }
 
-function groupedProperties(meta, object) {
+function groupedProperties(options, meta, object) {
   function category({ value }) {
     return isObject(value) ?  meta.forObject(value).get('category').getOrElse('(Uncategorised)')
     :      /* else */         '(Uncategorised)';
   }
+  function maybeSkipUndocumented([_, value]) {
+    if (options.skipUndocumented === false) {
+      return true;
+    } else {
+      return isObject(value)
+      &&     meta.forObject(value).get('documentation').map(_ => true).getOrElse(false);
+    }
+  }
+
+  const skipUndocumented = options.skipUndocumented === false ? false : true;
 
   const ps = ownProperties(object)
                .map(key => [key, object[key]])
+               .filter(maybeSkipUndocumented)
                .sort(([k1, _], [k2, __]) => compare(k1, k2))
                .map(([k, value]) => {
                  const [name, kind, property] = describeProperty(getProperty(object, k), k);
@@ -291,7 +302,7 @@ function intoObject(value) {
 }
 
 async function properties(meta, options, prefix) {
-  const props = groupedProperties(meta, meta.object());
+  const props = groupedProperties(options, meta, meta.object());
 
   if (props.length === 0) {
     return await inheritedProperties(meta, options);

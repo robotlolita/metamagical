@@ -12,6 +12,8 @@
 const yaml      = require('js-yaml');
 const marked    = require('marked');
 const { parse } = require('babylon');
+const template  = require('babel-template');
+const generate  = require('babel-generator').default;
 
 
 // -- CONSTANTS --------------------------------------------------------
@@ -19,6 +21,21 @@ const COMPUTED = true; /* computed properties */
 
 
 // -- HELPERS ----------------------------------------------------------
+function metamagical_withMeta(object, meta) {
+  var oldMeta = object[Symbol.for('@@meta:magical')] || {};
+
+  Object.keys(meta).forEach(function(key) {
+    oldMeta[key] = meta[key];
+  });
+  object[Symbol.for('@@meta:magical')] = oldMeta;
+
+  return object;
+}
+
+const withMeta = template(
+  `__metamagical_withMeta(OBJECT, META)`
+)
+
 function merge(...args) {
   return Object.assign({}, ...args);
 }
@@ -105,33 +122,33 @@ function Raw(value) {
 
 // -- IMPLEMENTATION ---------------------------------------------------
 module.exports = function({ types: t }) {
+  const withMetaFD  = parse(metamagical_withMeta.toString()).program.body[0];
+  const withMetaAST = t.functionExpression(
+    t.identifier('metamagical_withMeta'),
+    withMetaFD.params,
+    withMetaFD.body
+  );
+
 
   // --- HELPERS -------------------------------------------------------
-  function metaSymbol() {
-    return t.callExpression(
-      t.memberExpression(
-        t.identifier('Symbol'),
-        t.identifier('for')
-      ),
-      [t.stringLiteral('@@meta:magical')]
-    );
-  }
-
-  function intoExampleFunction(path, source, ast) {
+  function intoExampleFunction(source, ast) {
     const body = ast.program.body;
 
-    return new Raw(wrapRValue(t.functionExpression(
-      null,   // id
-      [],     // params
-      t.blockStatement(body),
-      false,  // generator
-      false   // async
-    ), { source }, path.hub.file));
+    return new Raw(withMeta({
+      OBJECT: t.functionExpression(
+        null,   // id
+        [],     // params
+        t.blockStatement(body),
+        false,  // generator
+        false   // async
+      ),
+      meta: mergeMeta({ source })
+    }).expression);
   }
 
-  function parseExample(path, { name, source }) {
-    return name       ?  { name, call: intoExampleFunction(path, source, parse(source)), inferred: true }
-    :      /* else */    { name: '', call: intoExampleFunction(path, source, parse(source)), inferred: true };
+  function parseExample({ name, source }) {
+    return name       ?  { name, call: intoExampleFunction(source, parse(source)), inferred: true }
+    :      /* else */    { name: '', call: intoExampleFunction(source, parse(source)), inferred: true };
   }
 
   function inferName(id, computed) {
@@ -140,18 +157,55 @@ module.exports = function({ types: t }) {
     :      /* otherwise */                    {};
   }
 
-  function inferExamples(path, documentation) {
+  function inferExamples(documentation) {
     const examples = collectExamples(documentation || '');
 
-    return examples.length > 0?  { examples: examples.map(e => parseExample(path, e)) }
+    return examples.length > 0?  { examples: examples.map(parseExample) }
     :      /* otherwise */       { };
   }
 
-  function inferSource(path) {
-    const code = path.hub.file.code;
+  function hasLocation(object) {
+    return object && 'start' in object && 'end' in object;
+  }
 
-    return code       ?  { source: code.slice(path.node.start, path.node.end) }
-    :      /* else */    { }
+  function sourceFrom(code, start, end) {
+    return code != null && start != null && end != null ?  { source: code.slice(start, end) }
+    :      /* otherwise */                                 { };
+  }
+
+  function isTransformedMethod(path, node) {
+    return t.isObjectProperty(path.node)
+    &&     t.isFunctionExpression(node)
+    &&     !hasLocation(node)
+    &&     hasLocation(node.body);
+  }
+
+  function generateObjectMethod(node, bodySource) {
+    const { code } = generate(t.objectMethod(
+      "method",
+      node.key,
+      node.value.params,
+      t.blockStatement([]),
+      node.computed
+    ));
+    return code.replace(/\{\s*\}\s*$/, '') + bodySource;
+  }
+
+  function inferSource(path, node) {
+    const code = path.hub.file.code;
+    if (hasLocation(node)) {
+      return sourceFrom(code, node.start, node.end);
+    } else if (isTransformedMethod(path, node)) {
+      const { start, end } = node.body;
+      const { source }     = sourceFrom(code, start, end);
+      if (source) {
+        return { source: generateObjectMethod(path.node, source) }
+      } else {
+        return { };
+      }
+    } else {
+      return { }
+    }
   }
 
   function objectToExpression(object) {
@@ -177,66 +231,62 @@ module.exports = function({ types: t }) {
     :      /* otherwise */         raise(new TypeError(`Type of property not supported: ${value}`));
   }
 
-  function setMeta(path, lvalue, meta) {
-    const doc = meta.documentation;
-    if (doc) {
-      return t.assignmentExpression(
-        '=',
-        t.memberExpression(lvalue, metaSymbol(), COMPUTED),
-        objectToExpression(Object.assign(meta, inferExamples(path, doc), {
-          documentation: doc.replace(/^::$/gm, '').replace(/::[ \t]*$/gm, ':')
-        }))
-      );
-    } else {
-      return t.assignmentExpression(
-        '=',
-        t.memberExpression(lvalue, metaSymbol(), COMPUTED),
-        objectToExpression(meta)
-      );
+  function mergeMeta(...args) {
+    let fullMeta = merge(...args);
+
+    if (fullMeta.documentation) {
+      const doc = fullMeta.documentation;
+      fullMeta = merge(fullMeta, inferExamples(doc));
+      fullMeta.documentation = doc.replace(/^::$/gm, '').replace(/::[ \t]*$/gm, ':');
     }
+
+    return objectToExpression(fullMeta);
   }
 
-  function assignMeta(binding, doc, path, additionalMeta) {
-    if (doc) {
-      const meta = Object.assign(additionalMeta || {}, parseDoc(doc));
-      path.insertAfter(t.expressionStatement(setMeta(path, binding, meta)));
+  function includeHelper(path) {
+    if (!path.hub.file.scope.hasBinding('__metamagical_withMeta')) {
+      path.hub.file.scope.push({
+        id:   t.identifier('__metamagical_withMeta'),
+        init: withMetaAST
+      });
     }
-  }
-
-  function wrapRValue(expr, meta, path, bindingName) {
-    const id = path.scope.generateUidIdentifier(bindingName || 'ref');
-    path.scope.push({ id });
-
-    return t.sequenceExpression([
-      t.assignmentExpression('=', id, expr),
-      setMeta(path, id, meta),
-      id
-    ]);
   }
 
 
   // --- PUBLIC TRANSFORM ----------------------------------------------
   const visitor = {
     FunctionDeclaration(path, _state) {
-      assignMeta(
-        path.node.id,
-        getDocComment(path.node),
-        path,
-        merge({
-          name: path.node.id.name,
-        }, inferSource(path))
-      );
+      const doc = getDocComment(path.node);
+
+      if (doc) {
+        includeHelper(path);
+        path.insertAfter(withMeta({
+          OBJECT: path.node.id,
+          META:   mergeMeta(
+            { name: path.node.id.name },
+            inferSource(path, path.node),
+            parseDoc(doc)
+          )
+        }));
+      }
     },
 
     VariableDeclaration(path, _state) {
       if (path.node.declarations.length === 1) {
         const declarator = path.node.declarations[0];
-        assignMeta(
-          declarator.id,
-          getDocComment(path.node),
-          path,
-          merge(inferName(declarator.id), inferSource(path))
-        );
+        const doc = getDocComment(path.node);
+
+        if (doc && declarator.init) {
+          includeHelper(path);
+          declarator.init = withMeta({
+            OBJECT: declarator.init,
+            META:   mergeMeta(
+              inferName(declarator.id),
+              inferSource(path, declarator.init),
+              parseDoc(doc)
+            )
+          }).expression;
+        }
       }
     },
 
@@ -245,10 +295,14 @@ module.exports = function({ types: t }) {
       if (t.isAssignmentExpression(expr)) {
         const doc = getDocComment(path.node);
         if (doc) {
-          const inferredMeta = inferName(expr.left);
-          const meta = Object.assign(inferredMeta, inferSource(path), parseDoc(doc));
-
-          expr.right = wrapRValue(expr.right, meta, path, inferredMeta.name);
+          expr.right = withMeta({
+            OBJECT: expr.right,
+            META:   mergeMeta(
+              inferName(expr.left),
+              inferSource(path, expr.right),
+              parseDoc(doc)
+            )
+          }).expression
         }
       }
     },
@@ -256,36 +310,40 @@ module.exports = function({ types: t }) {
     ObjectProperty(path, _state) {
       const doc = getDocComment(path.node);
       if (doc) {
-        const inferredMeta = inferName(path.node.key, path.node.computed);
-        const meta = Object.assign(inferredMeta, inferSource(path), parseDoc(doc));
-
-        path.node.value = wrapRValue(path.node.value, meta, path, inferredMeta.name);
+        path.node.value = withMeta({
+          OBJECT: path.node.value,
+          META:   mergeMeta(
+            inferName(path.node.key, path.node.computed),
+            inferSource(path, path.node.value),
+            parseDoc(doc)
+          )
+        }).expression;
       }
     },
 
-    ObjectMethod(path, _state) {
-      const doc = getDocComment(path.node);
-      if (doc) {
-        if (!path.node.method) {
-          console.warn('Getters and setters are not supported in Meta:Magical\'s babel plugin.');
-          return;
-        }
-
-        const fn = t.functionExpression(
-          path.node.computed ?  null : path.node.key,
-          path.node.params,
-          path.node.body,
-          path.node.generator,
-          path.node.async
-        );
-
-        // Babel will invoke ObjectProperty on this newly created node
-        // This is a problem :<
-        path.replaceWith(
-          t.objectProperty(path.node.key, fn, path.node.computed)
-        );
-      }
-    }
+//    ObjectMethod(path, _state) {
+//      const doc = getDocComment(path.node);
+//      if (doc) {
+//        if (!path.node.method) {
+//          console.warn('Getters and setters are not supported in Meta:Magical\'s babel plugin.');
+//          return;
+//        }
+//
+//        const fn = t.functionExpression(
+//          path.node.computed ?  null : path.node.key,
+//          path.node.params,
+//          path.node.body,
+//          path.node.generator,
+//          path.node.async
+//        );
+//
+//        // Babel will invoke ObjectProperty on this newly created node
+//        // This is a problem :<
+//        path.replaceWith(
+//          t.objectProperty(path.node.key, fn, path.node.computed)
+//        );
+//      }
+//    }
   };
 
   return { visitor };

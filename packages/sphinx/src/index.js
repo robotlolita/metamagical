@@ -295,20 +295,20 @@ async function renderMember(options, meta, { key, name, kind, property, value })
                                 meta.get('returns').map(v => ({ 'returns': v })).getOrElse(null)
                               ])))
         : /* else */          null,
-        meta.get('type').map(renderType).getOrElse(null)
+        meta.get('type').map(renderType).getOrElse(null),
+        skip.has(name) ? Text(doc ? (await markdownToRST(replaceMarkdownHeading(doc), 5)) : '')
+        : /* else */     Block([
+          Text(doc ? (await markdownToRST(synopsis(doc))) : ''),
+          link('+', `${prefix}${key}`),
+          Directive(
+            'toctree',
+            '',
+            Options({ 'hidden': '' }),
+            Block([Text(`${prefix}${key}`)])
+          )
+        ])
       ]))
-    ),
-    skip.has(name) ? Text(doc ? (await markdownToRST(replaceMarkdownHeading(doc), 5)) : '')
-    : /* else */     Block([
-                       Text(doc ? (await markdownToRST(synopsis(doc))) : ''),
-                       link('+', `${prefix}${key}`),
-                       Directive(
-                         'toctree',
-                         '',
-                         Options({ 'hidden': '' }),
-                         Block([Text(`${prefix}${key}`)])
-                       )
-                     ])
+    )
   ]);
 }
 

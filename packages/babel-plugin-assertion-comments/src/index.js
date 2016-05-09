@@ -20,7 +20,7 @@ const { parse } = require('babylon');
  * A template for creating an assertion AST.
  */
 const buildAssertion = template(`
-  metamagical_assert_equals(require(MODULE), ACTUAL, EXPECTED, MESSAGE)
+  __metamagical_assert_equals(require(MODULE), ACTUAL, EXPECTED, MESSAGE)
 `);
 
 
@@ -119,15 +119,7 @@ function isAssertion(comment) {
  * assertion comments after a particular expression. It then transforms
  * this assertion comment into a real runtime assertion.
  *
- * That is, the following example:
- *
  *     2 * 2  // ==> 4
- *
- * Gets compiled to:
- *
- *     require('assert').deepStrictEqual(2 * 2, 4, '2 * 2 ==> 4')
- *
- * Only strict assertion comments are supported right now.
  *
  *
  * ## Options
@@ -227,9 +219,9 @@ module.exports = function({ types: t }) {
         const assertion    = getTrailingAssertion(path.node);
 
         if (assertion) {
-          if (!path.scope.hasBinding('metamagical_assert_equals')) {
-            path.scope.push({
-              id: t.identifier('metamagical_assert_equals'),
+          if (!path.hub.file.scope.hasBinding('__metamagical_assert_equals')) {
+            path.hub.file.scope.push({
+              id: t.identifier('__metamagical_assert_equals'),
               init: assertEqualsAST
             });
           }

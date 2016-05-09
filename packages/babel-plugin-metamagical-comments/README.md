@@ -182,8 +182,8 @@ The transform plugin requires Node 4+ and Babel 6+.
 
 This plugin is not entirely done yet, the following is a list of current limitations:
 
-- Only works for function and variable (const/let/var) declarations;
-- No meta-data is inferred from the source code yet;
+- Doesn't support object methods, getters, or arrows yet;
+- Limited meta-data inference (name, signature, source);
 
 
 ## Support

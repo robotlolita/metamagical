@@ -131,6 +131,11 @@ module.exports = function({ types: t }) {
 
 
   // --- HELPERS -------------------------------------------------------
+  function toIdentifier({ name }) {
+    return name        ?  t.Identifier(name)
+    :      /* else */     null;
+  }
+
   function intoExampleFunction(source, ast) {
     const body = ast.program.body;
 
@@ -162,6 +167,29 @@ module.exports = function({ types: t }) {
 
     return examples.length > 0?  { examples: examples.map(parseExample) }
     :      /* otherwise */       { };
+  }
+
+  function inferSignature(expr, name) {
+    if (!t.isFunctionExpression(expr) && !t.isFunctionDeclaration(expr)) {
+      return { };
+    }
+    if (!t.isIdentifier(name)) {
+      return { };
+    }
+
+    const { code } = generate(t.functionExpression(
+      name,
+      expr.params,
+      t.blockStatement([]),
+      expr.generator,
+      expr.async
+    ));
+
+    return {
+      signature: code.replace(/^\s*async function/, 'async')
+                     .replace(/^\s*function/, '')
+                     .replace(/\s*{\s*\}\s*$/, '')
+    }
   }
 
   function hasLocation(object) {
@@ -265,6 +293,7 @@ module.exports = function({ types: t }) {
           META:   mergeMeta(
             { name: path.node.id.name },
             inferSource(path, path.node),
+            inferSignature(path.node, path.node.id),
             parseDoc(doc)
           )
         }));
@@ -283,6 +312,7 @@ module.exports = function({ types: t }) {
             META:   mergeMeta(
               inferName(declarator.id),
               inferSource(path, declarator.init),
+              inferSignature(declarator.init, declarator.id),
               parseDoc(doc)
             )
           }).expression;
@@ -295,11 +325,14 @@ module.exports = function({ types: t }) {
       if (t.isAssignmentExpression(expr)) {
         const doc = getDocComment(path.node);
         if (doc) {
+          const name = inferName(expr.left);
+
           expr.right = withMeta({
             OBJECT: expr.right,
             META:   mergeMeta(
-              inferName(expr.left),
+              name,
               inferSource(path, expr.right),
+              inferSignature(expr.right, toIdentifier(name)),
               parseDoc(doc)
             )
           }).expression
@@ -310,11 +343,14 @@ module.exports = function({ types: t }) {
     ObjectProperty(path, _state) {
       const doc = getDocComment(path.node);
       if (doc) {
+        const name = inferName(path.node.key, path.node.computed);
+
         path.node.value = withMeta({
           OBJECT: path.node.value,
           META:   mergeMeta(
-            inferName(path.node.key, path.node.computed),
+            name,
             inferSource(path, path.node.value),
+            inferSignature(path.node.value, toIdentifier(name)),
             parseDoc(doc)
           )
         }).expression;

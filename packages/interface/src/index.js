@@ -104,13 +104,17 @@ module.exports = Refinable.refine({
     },
 
     stability(xs) {
-      return xs.reduce((l, r) => {
-        const il = Stability.fromIdentifier(l).index;
-        const ir = Stability.fromIdentifier(r).index;
+      if (xs.length === 0) {
+        return null;
+      } else {
+        return xs.reduce((l, r) => {
+          const il = Stability.fromIdentifier(l).index;
+          const ir = Stability.fromIdentifier(r).index;
 
-        return il < ir    ?  l
-        :      /* else */    r;
-      });
+          return il < ir    ?  l
+          :      /* else */    r;
+        });
+      }
     },
 
     portability(xs) {

@@ -147,7 +147,7 @@ module.exports = function({ types: t }) {
         false,  // generator
         false   // async
       ),
-      meta: mergeMeta({ source })
+      META: mergeMeta({ source })
     }).expression);
   }
 

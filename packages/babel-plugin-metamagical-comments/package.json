@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-transform-metamagical-comments",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Compile meta:magical doc-comments to runtime object annotations.",
   "license": "MIT",
   "main": "./lib/index.js",

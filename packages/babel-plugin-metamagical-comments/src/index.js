@@ -327,6 +327,7 @@ module.exports = function({ types: t }) {
         if (doc) {
           const name = inferName(expr.left);
 
+          includeHelper(path);
           expr.right = withMeta({
             OBJECT: expr.right,
             META:   mergeMeta(
@@ -345,6 +346,7 @@ module.exports = function({ types: t }) {
       if (doc) {
         const name = inferName(path.node.key, path.node.computed);
 
+        includeHelper(path);
         path.node.value = withMeta({
           OBJECT: path.node.value,
           META:   mergeMeta(

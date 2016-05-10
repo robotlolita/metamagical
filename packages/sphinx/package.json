@@ -1,6 +1,6 @@
 {
   "name": "metamagical-sphinx",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generates Sphinx documentation from documentation metadata.",
   "main": "./lib/index.js",
   "repository": {
@@ -17,7 +17,7 @@
     "babel-polyfill": "^6.8.0",
     "babel-types": "^6.8.1",
     "babylon": "^6.8.0",
-    "folktale": "github:origamitower/folktale",
+    "folktale": "2.0.0-alpha1",
     "marked": "^0.3.5"
   }
 }

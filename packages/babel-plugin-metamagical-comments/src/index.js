@@ -25,6 +25,9 @@ function metamagical_withMeta(object, meta) {
   var oldMeta = object[Symbol.for('@@meta:magical')] || {};
 
   Object.keys(meta).forEach(function(key) {
+    if (/^~/.test(key)) {
+      key = key.slice(1);
+    }
     oldMeta[key] = meta[key];
   });
   object[Symbol.for('@@meta:magical')] = oldMeta;
@@ -136,6 +139,16 @@ module.exports = function({ types: t }) {
     :      /* else */     null;
   }
 
+  function lazy(expr) {
+    return t.functionExpression(
+      null,
+      [],
+      t.blockStatement([
+        t.returnStatement(expr)
+      ])
+    );
+  }
+
   function intoExampleFunction(source, ast) {
     const body = ast.program.body;
 
@@ -154,6 +167,53 @@ module.exports = function({ types: t }) {
   function parseExample({ name, source }) {
     return name       ?  { name, call: intoExampleFunction(source, parse(source)), inferred: true }
     :      /* else */    { name: '', call: intoExampleFunction(source, parse(source)), inferred: true };
+  }
+
+  function findClosestParent(path, predicate) {
+    return !path.parentPath           ?  null
+    :      predicate(path.parentPath) ?  path.parentPath
+    :      /* otherwise */               findClosestParent(path.parentPath, predicate);
+  }
+
+  function inferParent(lvalue) {
+    if (t.isMemberExpression(lvalue)) {
+      return { 'belongsTo': new Raw(lazy(lvalue.object)) };
+    } else {
+      return { };
+    }
+  }
+
+  function getParentFromObjectProperty(path) {
+    const parent = findClosestParent(path, p => {
+      return t.isVariableDeclarator(p)
+      ||     t.isAssignmentExpression(p)
+      ||     t.isObjectProperty(p);
+    });
+
+    if (t.isVariableDeclarator(parent)) {
+      return parent.node.id;
+    } else if (t.isAssignmentExpression(parent)) {
+      return parent.node.left;
+    } else if (t.isObjectProperty(parent)) {
+      const object = getParentFromObjectProperty(parent);
+      if (t.isExpression(object)) {
+        return t.memberExpression(
+          object,
+          parent.node.key,
+          parent.node.computed
+        );
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  function inferParentFromObjectProperty(path) {
+    const expr = getParentFromObjectProperty(path);
+    return expr        ?  { 'belongsTo': new Raw(lazy(expr)) }
+    :      /* else */     { };
   }
 
   function inferName(id, computed) {
@@ -189,6 +249,7 @@ module.exports = function({ types: t }) {
       signature: code.replace(/^\s*async function/, 'async')
                      .replace(/^\s*function/, '')
                      .replace(/\s*{\s*\}\s*$/, '')
+                     .trim()
     }
   }
 
@@ -245,18 +306,36 @@ module.exports = function({ types: t }) {
   function pairToProperty([key, value]) {
     return t.objectProperty(
       t.stringLiteral(key),
-      valueToLiteral(value)
+      valueToLiteral(value, key)
     );
   }
 
-  function valueToLiteral(value) {
-    return value instanceof Raw ?  value.value
-    :      Array.isArray(value) ?  t.arrayExpression(value.map(valueToLiteral))
-    :      isString(value)      ?  t.stringLiteral(value)
-    :      isBoolean(value)     ?  t.booleanLiteral(value)
-    :      isNumber(value)      ?  t.numericLiteral(value)
-    :      isObject(value)      ?  objectToExpression(value)
-    :      /* otherwise */         raise(new TypeError(`Type of property not supported: ${value}`));
+  const specialParsers = {
+    '~belongsTo'(value) {
+      const ast = parse(value);
+      t.assertExpressionStatement(ast.program.body[0]);
+
+      return lazy(ast.program.body[0].expression);
+    }
+  }
+
+  function parseSpecialProperty(value, key) {
+    return specialParsers[key](value);
+  }
+
+  function isSpecial(value, key) {
+    return key && key in specialParsers;
+  }
+
+  function valueToLiteral(value, key) {
+    return value instanceof Raw  ?  value.value
+    :      Array.isArray(value)  ?  t.arrayExpression(value.map(x => valueToLiteral(x)))
+    :      isSpecial(value, key) ?  parseSpecialProperty(value, key)
+    :      isString(value)       ?  t.stringLiteral(value)
+    :      isBoolean(value)      ?  t.booleanLiteral(value)
+    :      isNumber(value)       ?  t.numericLiteral(value)
+    :      isObject(value)       ?  objectToExpression(value)
+    :      /* otherwise */          raise(new TypeError(`Type of property not supported: ${value}`));
   }
 
   function mergeMeta(...args) {
@@ -334,6 +413,7 @@ module.exports = function({ types: t }) {
               name,
               inferSource(path, expr.right),
               inferSignature(expr.right, toIdentifier(name)),
+              inferParent(expr.left),
               parseDoc(doc)
             )
           }).expression
@@ -353,35 +433,12 @@ module.exports = function({ types: t }) {
             name,
             inferSource(path, path.node.value),
             inferSignature(path.node.value, toIdentifier(name)),
+            inferParentFromObjectProperty(path),
             parseDoc(doc)
           )
         }).expression;
       }
     },
-
-//    ObjectMethod(path, _state) {
-//      const doc = getDocComment(path.node);
-//      if (doc) {
-//        if (!path.node.method) {
-//          console.warn('Getters and setters are not supported in Meta:Magical\'s babel plugin.');
-//          return;
-//        }
-//
-//        const fn = t.functionExpression(
-//          path.node.computed ?  null : path.node.key,
-//          path.node.params,
-//          path.node.body,
-//          path.node.generator,
-//          path.node.async
-//        );
-//
-//        // Babel will invoke ObjectProperty on this newly created node
-//        // This is a problem :<
-//        path.replaceWith(
-//          t.objectProperty(path.node.key, fn, path.node.computed)
-//        );
-//      }
-//    }
   };
 
   return { visitor };

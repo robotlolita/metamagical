@@ -316,28 +316,37 @@ module.exports = function({ types: t }) {
     :      /* otherwise */       { };
   }
 
+  function expressionHasSignature(expr) {
+    return t.isFunctionExpression(expr)
+    ||     t.isFunctionDeclaration(expr)
+    ||     t.isObjectMethod(expr)
+    ||     t.isArrowFunctionExpression(expr);
+  }
+
   function inferSignature(expr, name) {
-    if (!t.isFunctionExpression(expr) && !t.isFunctionDeclaration(expr)) {
+    if (!expressionHasSignature(expr)) {
       return { };
     }
     if (!t.isIdentifier(name)) {
       return { };
     }
 
-    const { code } = generate(t.functionExpression(
+    let node = t.objectMethod(
+      expr.kind || 'method',
       name,
       expr.params,
       t.blockStatement([]),
-      expr.generator,
-      expr.async
-    ));
+      false
+    );
+    node.async     = expr.async || false;
+    node.generator = expr.generator || false;
+
+    const { code } = generate(node);
 
     return {
-      signature: code.replace(/^\s*async function/, 'async')
-                     .replace(/^\s*function/, '')
-                     .replace(/\s*{\s*\}\s*$/, '')
+      signature: code.replace(/\s*{\s*\}\s*$/, '')
                      .trim()
-    }
+    };
   }
 
   function hasLocation(object) {

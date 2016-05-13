@@ -14,7 +14,7 @@
     "metadata",
     "documentation"
   ],
-  "author": "Quildreen Motta",
+  "author": "Quildreen Motta <queen@robotlolita.me>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/origamitower/metamagical/issues"
@@ -24,5 +24,11 @@
   "dependencies": {
     "data.maybe": "^1.2.2",
     "refinable": "^1.0.1"
+  },
+  "metamagical": {
+    "copyright": "(c) 2016 Quildreen Motta",
+    "maintainers": [
+      "Quildreen Motta <queen@robotlolita.me> (http://robotlolita.me/)"
+    ]
   }
 }

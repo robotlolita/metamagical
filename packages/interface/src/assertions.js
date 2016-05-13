@@ -1,29 +1,22 @@
-//----------------------------------------------------------------------
+//---------------------------------------------------------------------
 //
 // This source file is part of the Meta:Magical project.
 //
 // See LICENCE for licence information.
 // See CONTRIBUTORS for the list of contributors to the project.
 //
-//----------------------------------------------------------------------
+//---------------------------------------------------------------------
 
 /*~
  * Assertions used by other modules.
  *
  * ---
  * name        : module assertions
- * module      : metamagical-interface/assertions
- * copyright   : (c) 2016 Quildreen Motta
- * licence     : MIT
- * repository  : https://github.com/origamitower/metamagical
- *
+ * module      : metamagical-interface/lib/assertions
  * category    : Assertions
  * portability : portable
  * platforms:
  *   - ECMAScript 3
- *
- * maintainers:
- *   - Quildreen Motta <queen@robotlolita.me>
  */
 module.exports = {
   /*~
@@ -36,7 +29,6 @@ module.exports = {
    * throws:
    *   TypeError: when the value isn't an object.
    *
-   * signature: assertObject(value)
    * type: |
    *   (Any) => None :: throws TypeError
    */

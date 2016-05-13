@@ -99,7 +99,19 @@ function metamagical_withMeta(object, meta) {
 
 const withMeta = template(
   `__metamagical_withMeta(OBJECT, META)`
-)
+);
+
+const getGetter = template(
+  `Object.getOwnPropertyDescriptor(OBJECT, KEY).get`
+);
+
+const getSetter = template(
+  `Object.getOwnPropertyDescriptor(OBJECT, KEY).set`
+);
+
+const getProperty = template(
+  `OBJECT[KEY]`
+);
 
 function compact(object) {
   let result = {};
@@ -355,6 +367,10 @@ module.exports = function({ types: t }) {
     return code.replace(/\{\s*\}\s*$/, '') + bodySource;
   }
 
+  function anyPropertyHasDoc(object) {
+    return object.properties.some(n => getDocComment(n) != null);
+  }
+
   function inferSource(path, node) {
     const code = path.hub.file.code;
     if (hasLocation(node)) {
@@ -465,6 +481,38 @@ module.exports = function({ types: t }) {
     }
   }
 
+  function accessorFor(node) {
+    return node.kind === 'set' ?  getSetter
+    :      node.kind === 'get' ?  getGetter
+    :      /* otherwise */        getProperty;
+  }
+
+  function metaForProperty(path, parentId, node) {
+    const doc = getDocComment(node);
+    if (doc) {
+      const name  = inferName(node.key, node.computed);
+      const meta  = parseDoc(doc);
+      const value = t.isObjectProperty(node) ? node.value : node;
+
+      return withMeta({
+        OBJECT: accessorFor(node)({
+          OBJECT: parentId,
+          KEY:    node.computed ? node.key
+                  : /* else */    t.stringLiteral(node.key.name)
+        }),
+        META:   mergeMeta(
+          name,
+          inferSource(path, value),
+          inferSignature(value, toIdentifier(name)),
+          { belongsTo: new Raw(lazy(parentId)) },
+          meta
+        )
+      }).expression;
+    } else {
+      return null;
+    }
+  }
+
 
   // --- PUBLIC TRANSFORM ----------------------------------------------
   const visitor = {
@@ -533,28 +581,35 @@ module.exports = function({ types: t }) {
       }
     },
 
-    ObjectProperty(path, _state) {
-      const doc = getDocComment(path.node);
-      if (doc) {
-        const name      = inferName(path.node.key, path.node.computed);
-        const parent    = inferParentFromObjectProperty(path);
-        const meta      = parseDoc(doc);
-        const hasParent = inferParentFromObjectProperty(path);
+    ObjectExpression(path, _state) {
+      const { node, scope, parent } = path;
+
+      if (anyPropertyHasDoc(node)) {
+        const id   = scope.generateUidIdentifierBasedOnNode(parent);
+        const meta = node.properties.map(x => metaForProperty(path, id, x))
+                                    .filter(Boolean);
 
         includeHelper(path);
-        path.node.value = withMeta({
-          OBJECT: path.node.value,
-          META:   mergeMeta(
-            name,
-            inferSource(path, path.node.value),
-            inferSignature(path.node.value, toIdentifier(name)),
-            parent,
-            hasParent? {} : inferFileAttributes(path),
+        scope.parent.push({ id });
+        path.replaceWith(
+          t.sequenceExpression([
+            t.assignmentExpression(
+              '=',
+              id,
+              t.objectExpression(node.properties.map(p =>
+                t.isObjectProperty(p)
+                  ? t.objectProperty(p.key, p.value, p.computed, p.shorthand, p.decorators)
+                  : t.objectMethod(p.kind, p.key, p.params, p.body, p.computed)
+              ))
+            )
+          ].concat(
             meta
-          )
-        }).expression;
+          ).concat([
+            id
+          ]))
+        );
       }
-    },
+    }
   };
 
   return { visitor };

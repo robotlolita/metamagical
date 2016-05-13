@@ -15,12 +15,74 @@ const { parse } = require('babylon');
 const template  = require('babel-template');
 const generate  = require('babel-generator').default;
 
+const fs   = require('fs');
+const path = require('path');
+
 
 // -- CONSTANTS --------------------------------------------------------
 const COMPUTED = true; /* computed properties */
 
 
 // -- HELPERS ----------------------------------------------------------
+function exists(pathString) {
+  try {
+    fs.accessSync(pathString);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+function read(fileName) {
+  return fs.readFileSync(fileName, 'utf-8');
+}
+
+const readPackage = function() {
+  let cache = new Map();
+
+  return (pathString) => {
+    const realPath = path.resolve(pathString);
+
+    if (cache.has(realPath)) {
+      return cache.get(realPath);
+    } else if (exists(path.join(realPath, 'package.json'))) {
+      try {
+        const data = {
+          file: realPath,
+          contents: JSON.parse(read(path.join(realPath, 'package.json')))
+        }
+        cache.set(realPath, data);
+        return data;
+      } catch (_) {
+        const data = {
+          file: realPath,
+          contents: { }
+        };
+        cache.set(realPath, data);
+        return data;
+      }
+    } else {
+      const parent = path.resolve(pathString, '..');
+      if (realPath === parent) {
+        return { };
+      } else {
+        return readPackage(parent);
+      }
+    }
+  }
+}();
+
+function computeModuleId(name, root, file) {
+  let modulePath = path.relative(root, file);
+  if (path.extname(modulePath) === '.js') {
+    modulePath = modulePath.slice(0, -3);
+  }
+  if (path.basename(modulePath) === 'index') {
+    modulePath = path.dirname(modulePath);
+  }
+  return path.join(name, modulePath).replace(/\/$/, '');
+}
+
 function metamagical_withMeta(object, meta) {
   var oldMeta = object[Symbol.for('@@meta:magical')] || {};
 
@@ -38,6 +100,19 @@ function metamagical_withMeta(object, meta) {
 const withMeta = template(
   `__metamagical_withMeta(OBJECT, META)`
 )
+
+function compact(object) {
+  let result = {};
+
+  Object.keys(object).forEach(key => {
+    const value = object[key];
+    if (value != null) {
+      result[key] = value;
+    }
+  });
+
+  return result;
+}
 
 function merge(...args) {
   return Object.assign({}, ...args);
@@ -297,6 +372,37 @@ module.exports = function({ types: t }) {
     }
   }
 
+  function getRepository(repo) {
+    return repo && repo.url ?  repo.url
+    :      /* else */          null  // TODO: parse npm's repo syntax
+  }
+
+  function inferFileAttributes(path) {
+    const file = path.hub.file.opts.filename;
+    const pkg  = readPackage(file);
+
+    if (!pkg || !pkg.file || !pkg.contents) {
+      return { };
+    } else {
+      const { contents:p, file:root } = pkg;
+
+      return Object.assign(
+        compact({
+          location: Object.assign({
+            filename: file,
+          }, path.node.loc || {}),
+          module:     computeModuleId(p.name, root, file),
+          homepage:   p.homepage,
+          licence:    p.license || p.licence,
+          authors:    [p.author].concat(p.contributors || []).filter(Boolean),
+          repository: getRepository(p.repository),
+          npmPackage: p.name
+        }),
+        p.metamagical || {}
+      );
+    }
+  }
+
   function objectToExpression(object) {
     return t.objectExpression(
       pairs(object).map(pairToProperty)
@@ -373,6 +479,7 @@ module.exports = function({ types: t }) {
             { name: path.node.id.name },
             inferSource(path, path.node),
             inferSignature(path.node, path.node.id),
+            inferFileAttributes(path),
             parseDoc(doc)
           )
         }));
@@ -392,6 +499,7 @@ module.exports = function({ types: t }) {
               inferName(declarator.id),
               inferSource(path, declarator.init),
               inferSignature(declarator.init, declarator.id),
+              inferFileAttributes(path),
               parseDoc(doc)
             )
           }).expression;
@@ -404,7 +512,10 @@ module.exports = function({ types: t }) {
       if (t.isAssignmentExpression(expr)) {
         const doc = getDocComment(path.node);
         if (doc) {
-          const name = inferName(expr.left);
+          const name      = inferName(expr.left);
+          const parent    = inferParent(expr.left);
+          const meta      = parseDoc(doc);
+          const hasParent = meta['~belongsTo'] || parent.belongsTo;
 
           includeHelper(path);
           expr.right = withMeta({
@@ -413,8 +524,9 @@ module.exports = function({ types: t }) {
               name,
               inferSource(path, expr.right),
               inferSignature(expr.right, toIdentifier(name)),
-              inferParent(expr.left),
-              parseDoc(doc)
+              parent,
+              hasParent? {} : inferFileAttributes(path),
+              meta
             )
           }).expression
         }
@@ -424,7 +536,10 @@ module.exports = function({ types: t }) {
     ObjectProperty(path, _state) {
       const doc = getDocComment(path.node);
       if (doc) {
-        const name = inferName(path.node.key, path.node.computed);
+        const name      = inferName(path.node.key, path.node.computed);
+        const parent    = inferParentFromObjectProperty(path);
+        const meta      = parseDoc(doc);
+        const hasParent = inferParentFromObjectProperty(path);
 
         includeHelper(path);
         path.node.value = withMeta({
@@ -433,8 +548,9 @@ module.exports = function({ types: t }) {
             name,
             inferSource(path, path.node.value),
             inferSignature(path.node.value, toIdentifier(name)),
-            inferParentFromObjectProperty(path),
-            parseDoc(doc)
+            parent,
+            hasParent? {} : inferFileAttributes(path),
+            meta
           )
         }).expression;
       }

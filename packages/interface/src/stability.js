@@ -1,48 +1,40 @@
-//----------------------------------------------------------------------
+//---------------------------------------------------------------------
 //
 // This source file is part of the Meta:Magical project.
 //
 // See LICENCE for licence information.
 // See CONTRIBUTORS for the list of contributors to the project.
 //
-//----------------------------------------------------------------------
+//---------------------------------------------------------------------
 
 
-// -- DEPENDENCIES -----------------------------------------------------
+// --[ Dependencies ]--------------------------------------------------
 const Refinable = require('refinable');
 
 
-// -- IMPLEMENTATION ---------------------------------------------------
+// --[ Implementation ]------------------------------------------------
 
 /*~
  * Handles describing and normalising stability identifiers.
  *
- * ---------------------------------------------------------------------
+ * ---
  * name        : module stability
  * module      : metamagical-interface/lib/stability
- * copyright   : (c) 2016 Quildreen Motta
- * licence     : MIT
- * repository  : https://github.com/origamitower/metamagical
- *
  * category    : Metadata
  * portability : portable
  * platforms:
  *   - ECMAScript 5
- *   - ECMAScript 3, with es5-shim
- *
- * maintainers:
- *   - Quildreen Motta <queen@robotlolita.me>
+ *   - ECMAScript 3 (with `es5-shim`)
  */
 module.exports = Refinable.refine({
   /*~
    * Converts a textual identifier of stability to a structured
    * representation of the stability.
    *
-   * -------------------------------------------------------------------
-   * category  : Converting to other types
+   * ---
+   * category  : Constructing stability entries
    * stability : stable
    *
-   * signature: .fromIdentifier(id)
    * type: |
    *   Stability.(String) => StabilityEntry
    */
@@ -60,13 +52,13 @@ module.exports = Refinable.refine({
    *
    * ---
    * stability : stable
-   * category  : Data
+   * category  : Stability index
    */
   index: {
     /*~
      * ---
      * stability : stable
-     * category  : Data
+     * category  : Stability entry
      */
     deprecated: Refinable.refine({
       index: 0,
@@ -80,7 +72,7 @@ on it.`
     /*~
      * ---
      * stability : stable
-     * category  : Data
+     * category  : Stability entry
      */
     experimental: Refinable.refine({
       index: 1,
@@ -93,7 +85,7 @@ future.`
     /*~
      * ---
      * stability : stable
-     * category  : Data
+     * category  : Stability entry
      */
     stable: Refinable.refine({
       index: 2,
@@ -108,7 +100,7 @@ backwards compatibility with the system, and a well-defined and automated
     /*~
      * ---
      * stability : stable
-     * category  : Data
+     * category  : Stability entry
      */
     locked: Refinable.refine({
       index: 3,

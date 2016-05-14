@@ -599,7 +599,7 @@ module.exports = function({ types: t }) {
                                     .filter(Boolean);
 
         includeHelper(path);
-        scope.parent.push({ id });
+        scope.push({ id });
         path.replaceWith(
           t.sequenceExpression([
             t.assignmentExpression(

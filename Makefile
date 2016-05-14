@@ -48,6 +48,9 @@ compile-markdown:
 compile-sphinx:
 	PACKAGES=packages/sphinx $(MAKE) compile
 
+compile-mkdocs:
+	PACKAGES=packages/mkdocs $(MAKE) compile
+
 clean:
 	rm -r packages/**/lib
 

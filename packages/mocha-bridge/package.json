@@ -1,6 +1,6 @@
 {
   "name": "metamagical-mocha-bridge",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Allows defining Mocha test cases from Meta:Magical examples.",
   "main": "./lib/index.js",
   "repository": {
@@ -15,5 +15,8 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/origamitower/metamagical/issues"
+  },
+  "peerDependencies": {
+    "metamagical-interface": "3.x"
   }
 }

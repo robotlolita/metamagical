@@ -43,7 +43,7 @@ module.exports = (meta, describe, it) => (object) => {
   function defineTests(object) {
     if (!isObject(object) || visited.has(object))  return;
 
-    const m = meta.forObject(object);
+    const m = meta.for(object);
 
     visited.add(object);
 

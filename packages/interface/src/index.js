@@ -549,7 +549,7 @@ const Interface = Refinable.refine({
    * Retrieves metadata defined directly on the current interface's context.
    *
    * ::
-   *     const x = {[Symbol.for('@@meta:magical)]: {
+   *     const x = {[Symbol.for('@@meta:magical')]: {
    *       name: 'x'
    *     }};
    *
@@ -609,11 +609,12 @@ const Interface = Refinable.refine({
    *   Interface.(String) => Maybe Any
    */
   getInheritedMeta(name) {
-    return this.getOwnMeta('belongsTo').chain(parent =>
-      this.for(parent).getOwnMeta(name).orElse(_ =>
+    return this.getOwnMeta('belongsTo').chain(parentFn => {
+      const parent = parentFn();
+      return this.for(parent).getOwnMeta(name).orElse(_ =>
         this.for(parent).getInheritedMeta(name)
-      )
-    );
+      );
+    });
   },
 
 

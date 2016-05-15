@@ -753,7 +753,7 @@ const Interface = Refinable.refine({
    *   (a is Interface).(String, Any) => Interface :: mutates a
    */
   set(field, value) {
-    const object = this.object();
+    const object = this.object;
     let meta     = metadata.get(object) || {};
 
     meta[field] = value;

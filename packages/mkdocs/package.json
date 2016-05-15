@@ -1,6 +1,6 @@
 {
   "name": "metamagical-mkdocs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generates Mkdocs documentation from documentation metadata.",
   "main": "./lib/index.js",
   "repository": {

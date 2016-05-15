@@ -92,9 +92,10 @@ function metamagical_withMeta(object, meta) {
 
   Object.keys(meta).forEach(function(key) {
     if (/^~/.test(key)) {
-      key = key.slice(1);
+      oldMeta[key.slice(1)] = meta[key];
+    } else {
+      oldMeta[key] = meta[key];
     }
-    oldMeta[key] = meta[key];
   });
   object[Symbol.for('@@meta:magical')] = oldMeta;
 
@@ -500,7 +501,20 @@ module.exports = function({ types: t }) {
     :      /* otherwise */        getProperty;
   }
 
-  function metaForProperty(path, parentId, node) {
+  function maybeFindBindingFrom(path) {
+    const node = path.node;
+    if (t.isExpressionStatement(node) && t.isAssignmentExpression(node.left)) {
+      return node.left;
+    } else if (t.isVariableDeclarator(node)) {
+      return node.id;
+    } else if (t.isExpression(node)) {
+      return maybeFindBindingFrom(path.parentPath);
+    } else {
+      return null;
+    }
+  }
+
+  function metaForProperty(path, objId, parentId, node) {
     const doc = getDocComment(node);
     if (doc) {
       const name  = inferName(node.key, node.computed);
@@ -509,7 +523,7 @@ module.exports = function({ types: t }) {
 
       return withMeta({
         OBJECT: accessorFor(node)({
-          OBJECT: parentId,
+          OBJECT: objId,
           KEY:    node.computed ? node.key
                   : /* else */    t.stringLiteral(node.key.name)
         }),
@@ -517,7 +531,8 @@ module.exports = function({ types: t }) {
           name,
           inferSource(path, value),
           inferSignature(value, toIdentifier(name)),
-          { belongsTo: new Raw(lazy(parentId)) },
+          parentId ? { belongsTo: new Raw(lazy(parentId)) } : {},
+          parentId ? { } : inferFileAttributes(path),
           meta
         )
       }).expression;
@@ -586,7 +601,7 @@ module.exports = function({ types: t }) {
               inferSource(path, expr.right),
               inferSignature(expr.right, toIdentifier(name)),
               parent,
-              hasParent? {} : inferFileAttributes(path),
+              hasParent ? {} : inferFileAttributes(path),
               meta
             )
           }).expression
@@ -598,9 +613,10 @@ module.exports = function({ types: t }) {
       const { node, scope, parent } = path;
 
       if (anyPropertyHasDoc(node)) {
-        const id   = scope.generateUidIdentifierBasedOnNode(parent);
-        const meta = node.properties.map(x => metaForProperty(path, id, x))
-                                    .filter(Boolean);
+        const id      = scope.generateUidIdentifierBasedOnNode(parent);
+        const binding = maybeFindBindingFrom(path);
+        const meta    = node.properties.map(x => metaForProperty(path, id, binding, x))
+                                       .filter(Boolean);
 
         includeHelper(path);
         scope.push({ id });

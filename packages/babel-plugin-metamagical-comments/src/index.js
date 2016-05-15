@@ -84,7 +84,11 @@ function computeModuleId(name, root, file) {
 }
 
 function metamagical_withMeta(object, meta) {
-  var oldMeta = object[Symbol.for('@@meta:magical')] || {};
+  const parent  = Object.getPrototypeOf(object);
+  let oldMeta   = object[Symbol.for('@@meta:magical')] || {};
+  if (parent && parent[Symbol.for('@@meta:magical')] === oldMeta) {
+    oldMeta = {};
+  }
 
   Object.keys(meta).forEach(function(key) {
     if (/^~/.test(key)) {

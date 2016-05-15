@@ -127,12 +127,12 @@ module.exports = {
       if (values.length === 0) {
         return Maybe.Nothing();
       } else {
-        return Maybe.Just(xs.reduce((l, r) => {
+        return Maybe.Just(values.reduce((l, r) => {
           const left  = Stability.fromIdentifier(l).index;
           const right = Stability.fromIdentifier(r).index;
 
-          return left < right ?  left
-          :      /* else */      right;
+          return left < right ?  l
+          :      /* else */      r;
         }));
       }
     }

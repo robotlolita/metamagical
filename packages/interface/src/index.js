@@ -121,7 +121,7 @@ function unique(xs) {
 function groupBy(values, groupingFn) {
   let result = new Map();
 
-  array.forEach(value => {
+  values.forEach(value => {
     const key    = groupingFn(value);
     const values = result.get(key) || [];
 
@@ -453,9 +453,9 @@ function compare(a, b) {
  *     }
  *
  * ---
+ * stability : experimental
  * module    : metamagical-interface
  * category  : Metadata
- * stability : experimental
  * platforms:
  *   - ECMAScript 2015
  */
@@ -650,13 +650,17 @@ const Interface = Refinable.refine({
     const collectFrom = (meta) => {
       const object = meta.object;
 
+      if (visited.has(object)) {
+        return [];
+      }
+
       visited.add(object);
 
-      return flatten(values(object).filter(isObject).map(child => {
-        if (visited.has(child)) {
+      return flatten(entriesOf(object).map(child => {
+        if (!isObject(child.value) || visited.has(child.value)) {
           return [];
         } else {
-          const childMeta = this.for(child);
+          const childMeta = this.for(child.value);
           return childMeta.getOwnMeta(name)
                           .map(x => [x])
                           .getOrElse([])
@@ -861,6 +865,11 @@ const Interface = Refinable.refine({
    *     const y = Object.create(x);
    *     Interface.for(y).prototype().get().object;
    *     // ==> x
+   *
+   * ---
+   * category: Navigating the context
+   * type: |
+   *   Interface.() => Maybe Interface
    */
   prototype() {
     const parent = prototypeOf(this.object);
@@ -891,7 +900,9 @@ const Interface = Refinable.refine({
     const asCategoryObject = ([category, members]) => ({ category, members });
 
     const category = ({ value }) =>
-      isObject(value) ?  this.for(value).get('category').getOrElse('(Uncategorised)')
+      isObject(value) ?  this.for(value)
+                             .get(this.fields.category)
+                             .getOrElse('(Uncategorised)')
       : /* else */       '(Uncategorised)';
 
     return groupBy(sortedProperties(this.object), category)

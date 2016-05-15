@@ -28,6 +28,10 @@ function unique(xs) {
   return [...new Set(xs)];
 }
 
+function flatten(xss) {
+  return xss.reduce((l, r) => l.concat(r), []);
+}
+
 
 // --[ Base for Fields ]-----------------------------------------------
 
@@ -82,7 +86,7 @@ module.exports = {
     allowInheritance: true,
     allowPropagation: true,
     merge(values) {
-      return Maybe.Just(unique(values));
+      return Maybe.Just(unique(flatten(values)));
     }
   }),
 
@@ -91,7 +95,7 @@ module.exports = {
     allowInheritance: true,
     allowPropagation: true,
     merge(values) {
-      return Maybe.Just(unique(values));
+      return Maybe.Just(unique(flatten(values)));
     }
   }),
 
@@ -222,7 +226,7 @@ module.exports = {
     allowInheritance: true,
     allowPropagation: true,
     merge(values) {
-      return Maybe.Just(unique(values));
+      return Maybe.Just(unique(flatten(values)));
     }
   }),
 

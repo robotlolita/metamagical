@@ -267,8 +267,15 @@ module.exports = function({ types: t }) {
     :      /* otherwise */               findClosestParent(path.parentPath, predicate);
   }
 
+  function isModuleExports(lvalue) {
+    return t.isIdentifier(lvalue.object)
+    &&     lvalue.object.name === 'module'
+    &&     t.isIdentifier(lvalue.property)
+    &&     lvalue.property.name === 'exports';
+  }
+
   function inferParent(lvalue) {
-    if (t.isMemberExpression(lvalue)) {
+    if (t.isMemberExpression(lvalue) && !isModuleExports(lvalue)) {
       return { 'belongsTo': new Raw(lazy(lvalue.object)) };
     } else {
       return { };

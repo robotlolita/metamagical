@@ -15,14 +15,26 @@ module.exports = function(meta) {
   const f = meta.fields;
 
   // ---[ Helpers ]----------------------------------------------------
+  function compact(object) {
+    let result = {};
+
+    Object.keys(object).forEach(key => {
+      const value = object[key];
+      if (!value.isNothing) {
+        result[key] = value.get();
+      }
+    });
+
+    return result;
+  }
+
   function lines(text) {
     return text.split(/\r\n|\n\r|\r|\n/);
   }
 
   function entries(object) {
     return Object.keys(object)
-                 .map(k => [k, object[k]])
-                 .filter(([_, v]) => !(v === '' || v == null || v.isNothing));
+                 .map(k => [k, object[k]]);
   }
 
   function repeat(text, times) {
@@ -143,7 +155,7 @@ module.exports = function(meta) {
   }
 
   function renderMeta(m) {
-    return table({
+    return table(compact({
       'From':        m.get(f.module),
       'Defined in':  m.get(f.belongsTo).map(o => signature(meta.for(o()))),
       'Copyright':   m.get(f.copyright),
@@ -155,16 +167,16 @@ module.exports = function(meta) {
       'Platforms':   m.get(f.platforms).map(list),
       'Maintainers': m.get(f.maintainers).map(list),
       'Authors':     m.get(f.authors).map(list)
-    });
+    }));
   }
 
   function renderFunctionMeta(m) {
-    return table({
+    return table(compact({
       'Complexity': m.get(f.complexity),
       'Throws':     m.get(f.throws).map(table),
       'Parameters': m.get(f.parameters).map(table),
       'Returns':    m.get(f.returns)
-    });
+    }));
   }
 
   function renderSource(source) {

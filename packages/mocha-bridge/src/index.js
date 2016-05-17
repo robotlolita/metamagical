@@ -47,9 +47,9 @@ module.exports = (meta, describe, it) => (object) => {
 
     visited.add(object);
 
-    m.get('name').chain(name => {
+    m.get(m.fields.name).chain(name => {
       describe(name, () => {
-        m.get('examples').chain(examples => {
+        m.get(m.fields.examples).chain(examples => {
           groupBy(examples, exampleDescription).forEach(([k, fs]) => {
             it(k, () => {
               fs.forEach(f => f.call());

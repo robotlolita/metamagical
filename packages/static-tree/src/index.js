@@ -48,11 +48,14 @@ module.exports = function(meta, name, root, options = {}) {
     references.set(object, [...parentPath, name].join('/'));
 
     let where = parentPath.reduce((container, key) => {
-      container[key] = container[key] || { children: [] };
+      container[key] = container[key] || { };
+      if (!container[key].children) {
+        container[key].children = {};
+      }
       return container[key].children;
     }, result);
 
-    where[name] = where[name] || { children: [] };
+    where[name] = where[name] || { children: {} };
     where[name].type   = 'object';
     where[name].object = object;
 

@@ -456,6 +456,7 @@ function compare(a, b) {
  * stability : experimental
  * module    : metamagical-interface
  * category  : Metadata
+ * isModule  : true
  * platforms:
  *   - ECMAScript 2015
  */

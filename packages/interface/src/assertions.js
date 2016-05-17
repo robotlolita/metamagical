@@ -13,6 +13,7 @@
  * ---
  * name        : module assertions
  * module      : metamagical-interface/lib/assertions
+ * isModule    : true
  * category    : Assertions
  * portability : portable
  * platforms:

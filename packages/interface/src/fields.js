@@ -36,6 +36,8 @@ function flatten(xss) {
 // --[ Base for Fields ]-----------------------------------------------
 
 /*~
+ * ---
+ * module: metamagical-interface/lib/fields
  */
 const Field = Refinable.refine({
   /*~
@@ -67,6 +69,9 @@ const Field = Refinable.refine({
 // --[ Built-in Fields ]-----------------------------------------------
 
 /*~
+ * ---
+ * module   : metamagical-interface/lib/fields
+ * isModule : true
  */
 module.exports = {
   Field: Field,
@@ -167,6 +172,10 @@ module.exports = {
   module: Field.refine({
     name: 'module',
     allowInheritance: true
+  }),
+
+  isModule: Field.refine({
+    name: 'isModule'
   }),
 
   belongsTo: Field.refine({

@@ -20,6 +20,7 @@ const Refinable = require('refinable');
  * ---
  * name        : module stability
  * module      : metamagical-interface/lib/stability
+ * isModule    : true
  * category    : Metadata
  * portability : portable
  * platforms:

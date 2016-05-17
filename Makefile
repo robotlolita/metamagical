@@ -51,6 +51,9 @@ compile-sphinx:
 compile-mkdocs:
 	PACKAGES=packages/mkdocs $(MAKE) compile
 
+compile-static-tree:
+	PACKAGES=packages/static-tree $(MAKE) compile
+
 clean:
 	rm -r packages/**/lib
 

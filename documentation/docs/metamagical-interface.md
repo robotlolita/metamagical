@@ -788,7 +788,7 @@ Refinable.refine({
 
 
 
-#### [`fields`](interface/fields)
+#### [`fields`](metamagical-interface/fields)
 
 
 
@@ -803,7 +803,7 @@ Refinable.refine({
 
 
 
-#### [`properties()`](interface/properties)
+#### [`properties()`](metamagical-interface/properties)
 
 
 
@@ -826,7 +826,7 @@ context.
 
 
 
-#### [`getInheritedMeta(name)`](interface/getInheritedMeta)
+#### [`getInheritedMeta(name)`](metamagical-interface/getInheritedMeta)
 
 
 
@@ -839,7 +839,7 @@ context.
 
 
 
-#### [`getOwnMeta(name)`](interface/getOwnMeta)
+#### [`getOwnMeta(name)`](metamagical-interface/getOwnMeta)
 
 
 
@@ -851,7 +851,7 @@ Retrieves metadata defined directly on the current interface's context.
 
 
 
-#### [`getPropagatedMeta(name)`](interface/getPropagatedMeta)
+#### [`getPropagatedMeta(name)`](metamagical-interface/getPropagatedMeta)
 
   - **Complexity:**
     O(n), `n` is the number of obects inside the current context
@@ -871,7 +871,7 @@ Retrieves metadata defined in the children of the interface's context.
 
 
 
-#### [`Stability`](interface/Stability)
+#### [`Stability`](metamagical-interface/Stability)
 
 
 
@@ -886,7 +886,7 @@ Handles describing and normalising stability identifiers.
 
 
 
-#### [`getter(name)`](interface/getter)
+#### [`getter(name)`](metamagical-interface/getter)
 
 
 
@@ -899,7 +899,7 @@ current context.
 
 
 
-#### [`property(name)`](interface/property)
+#### [`property(name)`](metamagical-interface/property)
 
 
 
@@ -912,7 +912,7 @@ context.
 
 
 
-#### [`prototype()`](interface/prototype)
+#### [`prototype()`](metamagical-interface/prototype)
 
 
 
@@ -925,7 +925,7 @@ Returns an interface pointing to the prototype of the current context's
 
 
 
-#### [`setter(name)`](interface/setter)
+#### [`setter(name)`](metamagical-interface/setter)
 
 
 
@@ -945,7 +945,7 @@ current context.
 
 
 
-#### [`set(field, value)`](interface/set)
+#### [`set(field, value)`](metamagical-interface/set)
 
 
 
@@ -958,7 +958,7 @@ context.
 
 
 
-#### [`update(meta)`](interface/update)
+#### [`update(meta)`](metamagical-interface/update)
 
 
 
@@ -978,7 +978,7 @@ context.
 
 
 
-#### [`get(field)`](interface/get)
+#### [`get(field)`](metamagical-interface/get)
 
   - **Complexity:**
     O(n), `n` is the number of objects inside the current context
@@ -992,7 +992,7 @@ context.
 
 
 
-#### [`getByName(name)`](interface/getByName)
+#### [`getByName(name)`](metamagical-interface/getByName)
 
   - **Complexity:**
     O(n), `n` is the number of objects inside the current context
@@ -1012,7 +1012,7 @@ Retrieves metadata with the given name from the interface's current context.
 
 
 
-#### [`for(value)`](interface/for)
+#### [`for(value)`](metamagical-interface/for)
 
 
 
@@ -1024,7 +1024,7 @@ Changes the current context of the Meta:Magical object.
 
 
 
-#### [`get object`](interface/object)
+#### [`get object`](metamagical-interface/object)
 
 
 
@@ -1049,7 +1049,7 @@ The current context of the Meta:Magical interface.
 
 
 
-#### [`.toString()`](interface/toString)
+#### [`.toString()`](metamagical-interface/toString)
 
 
 
@@ -1068,7 +1068,7 @@ A textual representation of this object.
 
 
 
-#### [`.refine(properties)`](interface/refine)
+#### [`.refine(properties)`](metamagical-interface/refine)
 
   - **Complexity:**
     O(n), `n` is the number of properties.

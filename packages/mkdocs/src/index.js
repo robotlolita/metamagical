@@ -9,8 +9,14 @@
 
 // --[ Dependencies ]--------------------------------------------------
 const marked = require('marked');
+const path   = require('path');
 
 
+// --[ Aliases ]-------------------------------------------------------
+const keys = Object.keys;
+
+
+// --[ Module ]--------------------------------------------------------
 module.exports = function(meta) {
   const f = meta.fields;
 
@@ -18,7 +24,7 @@ module.exports = function(meta) {
   function compact(object) {
     let result = {};
 
-    Object.keys(object).forEach(key => {
+    keys(object).forEach(key => {
       const value = object[key];
       if (!value.isNothing) {
         result[key] = value.get();
@@ -28,13 +34,28 @@ module.exports = function(meta) {
     return result;
   }
 
+  function flatten(xss) {
+    return xss.reduce((l, r) => l.concat(r), []);
+  }
+
+  function startsWith(substring, text) {
+    return text.indexOf(substring) === 0;
+  }
+
+  function toId(x) {
+    return x.replace(/\s/g, '-').replace(/[^\w\d]/g, '').toLowerCase();
+  }
+
   function lines(text) {
     return text.split(/\r\n|\n\r|\r|\n/);
   }
 
   function entries(object) {
-    return Object.keys(object)
-                 .map(k => [k, object[k]]);
+    return keys(object).map(k => [k, object[k]]);
+  }
+
+  function values(object) {
+    return keys(object).map(k => object[k]);
   }
 
   function repeat(text, times) {
@@ -126,11 +147,16 @@ module.exports = function(meta) {
             .getOrElse('(Anonymous)');
   }
 
+  function propertySignature(name, signature) {
+    return startsWith(`${name}(`, signature) ?  signature
+    :      /* otherwise */                      `${name}: ${signature}`;
+  }
+
   function propertyRepresentation({ name, value, kind }) {
     return kind === 'getter'           ?  `get ${name}`
     :      kind === 'setter'           ?  `set ${name}`
     :      typeof value === 'function' ?  meta.for(value)
-                                              .get(f.signature)
+                                              .get(f.signature).map(sig => propertySignature(name, sig))
                                               .getOrElse(`${name}()`)
     :      /* otherwise */                name;
   }
@@ -187,16 +213,20 @@ module.exports = function(meta) {
   }
 
   function renderMember(property, options) {
-    const m       = meta.for(intoObject(property.value));
-    const doc     = m.get(f.documentation).getOrElse('(No documentation)');
-    const skip    = options.skipDetailedPage || new Set();
-    const prefix  = options.linkPrefix || '';
-    const heading = `\`${propertyRepresentation(property)}\``;
-    const url     = `${prefix}${property.name}`;
+    const references = options.references || new Map();
+    const m          = meta.for(intoObject(property.value));
+    const doc        = m.get(f.documentation).getOrElse('(No documentation)');
+    const skip       = options.skipDetailedPage || new Set();
+    const prefix     = options.pathPrefix || '';
+    const heading    = `\`${propertyRepresentation(property)}\``;
+    const ext        = options.extension || '';
+    const hasDetails = isObject(property.value) && references.has(property.value) && !skip.has(property.value);
+    const url        = hasDetails ? path.relative(prefix, references.get(property.value) || '') + ext
+                     : /* else */   `#${toId(propertyRepresentation(property))}`;
 
     return block([
-      skip.has(property.name) ?  title(heading, 4)
-      : /* otherwise */          title(link(heading, url), 4),
+      hasDetails         ?  title(link(heading, url), 4)
+      : /* otherwise */     title(heading, 4),
       renderFunctionMeta(m),
       m.get(f.type).map(x => code(x, 'haskell')).getOrElse(null),
       summary(doc)
@@ -257,5 +287,25 @@ module.exports = function(meta) {
     return toMarkdown(meta.for(object), options);
   }
 
-  return { generate };
+  function generateTree(tree, options) {
+    function maybeGenerate(tree, name, path) {
+      if (tree.object) {
+        return [{
+          filename: [...path, `${name || 'index'}.md`].join('/'),
+          content:  generate(tree.object, { pathPrefix: path.join('/'), ...options })
+        }];
+      } else {
+        return [];
+      }
+    }
+
+    function go(tree, name, path) {
+      return maybeGenerate(tree, name, path)
+               .concat(flatten(entries(tree.children || {}).map(([k, v]) => go(v, k, [...path, name]))));
+    }
+
+    return flatten(entries(tree).map(([k, v]) => go(v, k, [])));
+  }
+
+  return { generate, generateTree };
 };

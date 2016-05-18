@@ -65,7 +65,7 @@ backwards compatibility with the system, and a well-defined and automated
 
 
 
-#### [`description`](stable/description)
+#### `description`
 
 
 
@@ -77,7 +77,7 @@ String
 
 
 
-#### [`index`](stable/index)
+#### `index`
 
 
 
@@ -89,7 +89,7 @@ Number
 
 
 
-#### [`name`](stable/name)
+#### `name`
 
 
 
@@ -114,7 +114,7 @@ String
 
 
 
-#### [`.toString()`](stable/toString)
+#### `toString: .toString()`
 
 
 
@@ -133,7 +133,7 @@ A textual representation of this object.
 
 
 
-#### [`.refine(properties)`](stable/refine)
+#### `refine: .refine(properties)`
 
   - **Complexity:**
     O(n), `n` is the number of properties.
@@ -150,6 +150,124 @@ convenient way than JavaScript's built-in [[Object.create]]:
     const o2 = o1.refine({ x: 2 });
     o1.x  // ==> 1
     o2.x  // ==> 2
+
+
+
+
+
+
+## Properties inherited from `(Anonymous)`
+
+
+
+
+### (Uncategorised)
+
+
+
+
+#### `__defineGetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `__defineSetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `__lookupGetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `__lookupSetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `set __proto__`
+
+
+
+(No documentation)
+
+
+
+#### `get __proto__`
+
+
+
+(No documentation)
+
+
+
+#### `constructor()`
+
+
+
+(No documentation)
+
+
+
+#### `hasOwnProperty()`
+
+
+
+(No documentation)
+
+
+
+#### `isPrototypeOf()`
+
+
+
+(No documentation)
+
+
+
+#### `propertyIsEnumerable()`
+
+
+
+(No documentation)
+
+
+
+#### `toLocaleString()`
+
+
+
+(No documentation)
+
+
+
+#### `toString()`
+
+
+
+(No documentation)
+
+
+
+#### `valueOf()`
+
+
+
+(No documentation)
+
 
 
 

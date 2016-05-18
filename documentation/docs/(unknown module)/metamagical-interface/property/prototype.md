@@ -33,7 +33,7 @@
 
 
 
-#### [`property(name)`](prototype/constructor)
+#### [`constructor: property(name)`](../../../metamagical-interface/property)
 
 
 
@@ -43,6 +43,124 @@ Interface.(String) => Maybe Interface
 
 Returns an interface pointing to the given property of the current
 context.
+
+
+
+
+
+
+## Properties inherited from `(Anonymous)`
+
+
+
+
+### (Uncategorised)
+
+
+
+
+#### `__defineGetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `__defineSetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `__lookupGetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `__lookupSetter__()`
+
+
+
+(No documentation)
+
+
+
+#### `set __proto__`
+
+
+
+(No documentation)
+
+
+
+#### `get __proto__`
+
+
+
+(No documentation)
+
+
+
+#### `constructor()`
+
+
+
+(No documentation)
+
+
+
+#### `hasOwnProperty()`
+
+
+
+(No documentation)
+
+
+
+#### `isPrototypeOf()`
+
+
+
+(No documentation)
+
+
+
+#### `propertyIsEnumerable()`
+
+
+
+(No documentation)
+
+
+
+#### `toLocaleString()`
+
+
+
+(No documentation)
+
+
+
+#### `toString()`
+
+
+
+(No documentation)
+
+
+
+#### `valueOf()`
+
+
+
+(No documentation)
+
 
 
 

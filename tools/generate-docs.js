@@ -2,8 +2,8 @@
 
 var fs = require('fs');
 var path = require('path');
-var metamagical = require('metamagical-interface');
-var generate = require('metamagical-mkdocs')(metamagical).generate;
+var metamagical = require('../packages/interface');
+var generateTree = require('../packages/mkdocs')(metamagical).generateTree;
 var tree = require('../packages/static-tree');
 
 var root = path.join(__dirname, '../documentation/docs');
@@ -44,29 +44,10 @@ function p(pathString) {
   return path.resolve(root, pathString);
 }
 
-function captureReferences(object) {
-  return new Set(Object.keys(object)
-                       .map(k => object[k].reference)
-                       .filter(Boolean))
-}
+var data  = tree(metamagical, 'metamagical-interface', require('../packages/interface'));
+var files = generateTree(data.tree, { references: data.references });
 
-function generateTree(objects, path) {
-  path = path || [];
-  Object.keys(objects).forEach(key => {
-    var value = objects[key];
-    if (value.object) {
-      console.log(': Generating ' + p(path.concat(key + '.md').join('/')) + '...');
-      var data = generate(value.object, {
-        linkPrefix: key + '/',
-        skipUndocumented: true,
-        skipDetailedPage: captureReferences(value.children),
-        excludePrototypes: new Set([Array.prototype, Object.prototype, Function.prototype])
-      });
-      write(p(path.concat(key + '.md').join('/')), data);
-    }
-    generateTree(value.children || {}, path.concat(key));
-  });
-}
-
-
-generateTree(tree(metamagical, 'metamagical-interface', require('../packages/interface'), {}));
+files.forEach(function(file) {
+  console.log(': Generating', file.filename);
+  write(p(file.filename), file.content);
+});

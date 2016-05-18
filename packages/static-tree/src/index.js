@@ -77,5 +77,8 @@ module.exports = function(meta, name, root, options = {}) {
   }
 
   go(result, name, root, []);
-  return result;
+  return {
+    references,
+    tree: result
+  };
 };

@@ -1,47 +1,72 @@
 
 
-# (Anonymous)
+# toString()
+
+
+```javascript
+Refinable.() => String
+```
 
 
 
 
+> 
+> **Stability: 2 - Stable**
+> 
+> This feature is stable, and its API is unlikely to change (unless deemed
+> necessary for security or other important reasons). You should expect
+> backwards compatibility with the system, and a well-defined and automated
+> (if possible) migration path if it changes.
+> 
 
 
+  - **From:**
+    refinable
+  - **Defined in:**
+    Refinable
   - **Copyright:**
-    
+    (c) 2016 Quildreen Motta
   - **Licence:**
-    
+    MIT
+  - **Repository:**
+    https://github.com/origamitower/refinable.git
+  - **Category:**
+    Inspecting
+  - **Portability:**
+    portable
   - **Platforms:**
-    
+      - ECMAScript 5
+      - ECMAScript 3 (with `es5-shim`)
   - **Maintainers:**
-    
+      - Quildreen Motta <queen@robotlolita.me>
   - **Authors:**
-    
-
-
-(No documentation)
+      - Quildreen Motta <queen@robotlolita.me>
 
 
 
-## Properties in `(Anonymous)`
+A textual representation of this object.
+
+
+
+## Source
+
+
+```javascript
+toString() {
+    return '[object Refinable]';
+  }
+```
+
+
+
+
+## Properties in `toString()`
 
 
 
 
 ### (Uncategorised)
 
-
-
-
-#### `length`
-
-
-
-```haskell
-Number
-```
-
-(No documentation)
 
 
 
@@ -57,7 +82,7 @@ String
 
 
 
-#### [`prototype`](merge/prototype)
+#### `prototype`
 
 
 

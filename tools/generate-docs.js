@@ -44,7 +44,9 @@ function p(pathString) {
   return path.resolve(root, pathString);
 }
 
-var data  = tree(metamagical, 'metamagical-interface', require('../packages/interface'));
+var data  = tree(metamagical, 'metamagical-interface', require('../packages/interface'), {
+  skipUndocumented: true
+});
 var files = generateTree(data.tree, { references: data.references });
 
 files.forEach(function(file) {

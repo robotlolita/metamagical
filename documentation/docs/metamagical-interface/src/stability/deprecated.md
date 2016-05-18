@@ -101,7 +101,7 @@ String
 
 
 
-#### `toString: .toString()`
+#### [`toString()`](../../../refinable/toString)
 
 
 
@@ -120,23 +120,16 @@ A textual representation of this object.
 
 
 
-#### `refine: .refine(properties)`
+#### [`refine(properties)`](../../../refinable/refine)
 
   - **Complexity:**
     O(n), `n` is the number of properties.
 
 ```haskell
-('a is Refinable).(Object Any) => (Object Any) <: 'a
+(a is Refinable).(Object Any) => (Object Any) <: a
 ```
 
 Constructs a new object that's enhanced with the given properties.
-The [[refine]] operation allows one to copy the receiver object,
-and enhance that copy with the provided properties, in a more
-convenient way than JavaScript's built-in [[Object.create]]:
-    const o1 = o.refine({ x: 1 });
-    const o2 = o1.refine({ x: 2 });
-    o1.x  // ==> 1
-    o2.x  // ==> 2
 
 
 

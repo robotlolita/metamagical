@@ -1,10 +1,10 @@
 
 
-# fromIdentifier(id)
+# refine(properties)
 
 
 ```javascript
-Stability.(String) => StabilityEntry
+(a is Refinable).(Object Any) => (Object Any) <: a
 ```
 
 
@@ -21,26 +21,41 @@ Stability.(String) => StabilityEntry
 
 
   - **From:**
-    metamagical-interface/src/stability
+    refinable
+  - **Defined in:**
+    Refinable
   - **Copyright:**
     (c) 2016 Quildreen Motta
   - **Licence:**
     MIT
   - **Repository:**
-    git://github.com/origamitower/metamagical.git
+    https://github.com/origamitower/refinable.git
   - **Category:**
-    Constructing stability entries
+    Refinement
+  - **Portability:**
+    portable
   - **Platforms:**
-    
+      - ECMAScript 5
+      - ECMAScript 3 (with `es5-shim`)
   - **Maintainers:**
-      - Quildreen Motta <queen@robotlolita.me> (http://robotlolita.me/)
+      - Quildreen Motta <queen@robotlolita.me>
   - **Authors:**
       - Quildreen Motta <queen@robotlolita.me>
+  - **Complexity:**
+    O(n), `n` is the number of properties.
 
 
+Constructs a new object that's enhanced with the given properties.
 
-Converts a textual identifier of stability to a structured
-representation of the stability.
+The [[refine]] operation allows one to copy the receiver object,
+and enhance that copy with the provided properties, in a more
+convenient way than JavaScript's built-in [[Object.create]]:
+
+    const o  = Refinable.refine({ x: 0, y: 3 });
+    const o1 = o.refine({ x: 1 });
+    const o2 = o1.refine({ x: 2 });
+    [o1.x, o1.y];  // ==> [1, 3]
+    [o2.x, o2.y];  // ==> [2, 3]
 
 
 
@@ -48,19 +63,23 @@ representation of the stability.
 
 
 ```javascript
-fromIdentifier(id) {
-    if (this.index.hasOwnProperty(id)) {
-      return this.index[id];
-    } else {
-      throw new Error(`No stability with id "${id}"`);
+refine(properties) {
+    const instance = clone(this);
+    const names    = keys(properties);
+
+    for (let i = 0; i < names.length; ++i) {
+      const name = names[i];
+      define(instance, name, descriptor(properties, name));
     }
+
+    return instance;
   }
 ```
 
 
 
 
-## Properties in `fromIdentifier(id)`
+## Properties in `refine(properties)`
 
 
 

@@ -123,7 +123,7 @@ String
 
 
 
-#### [`prototype`](../(unknown module)/metamagical-interface/getInheritedMeta/prototype)
+#### `prototype`
 
 
 

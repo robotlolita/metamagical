@@ -86,7 +86,7 @@ String
 
 
 
-#### [`prototype`](../(unknown module)/metamagical-interface/prototype/prototype)
+#### `prototype`
 
 
 

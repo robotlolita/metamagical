@@ -131,7 +131,7 @@ String
 
 
 
-#### [`prototype`](../(unknown module)/metamagical-interface/getPropagatedMeta/prototype)
+#### `prototype`
 
 
 

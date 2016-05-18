@@ -52,21 +52,7 @@ context.
 
 ```javascript
 properties() {
-    const byName     = (a, b) => compare(a.name, b.name);
-    const byCategory = (a, b) => compare(a.category, b.category);
-
-    const sortedProperties = (object) => entriesOf(object).sort(byName);
-    const asCategoryObject = ([category, members]) => ({ category, members });
-
-    const category = ({ value }) =>
-      isObject(value) ?  this.for(value)
-                             .get(this.fields.category)
-                             .getOrElse('(Uncategorised)')
-      : /* else */       '(Uncategorised)';
-
-    return groupBy(sortedProperties(this.object), category)
-             .map(asCategoryObject)
-             .sort(byCategory);
+    return categoriseProperties(this, entriesOf(this.object));
   }
 ```
 
@@ -95,7 +81,7 @@ String
 
 
 
-#### [`prototype`](../(unknown module)/metamagical-interface/properties/prototype)
+#### `prototype`
 
 
 

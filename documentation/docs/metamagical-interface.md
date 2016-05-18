@@ -756,21 +756,23 @@ Refinable.refine({
    *   Interface.() => Array { category: String, members: Array Property }
    */
   properties() {
-    const byName     = (a, b) => compare(a.name, b.name);
-    const byCategory = (a, b) => compare(a.category, b.category);
+    return categoriseProperties(this, entriesOf(this.object));
+  },
 
-    const sortedProperties = (object) => entriesOf(object).sort(byName);
-    const asCategoryObject = ([category, members]) => ({ category, members });
-
-    const category = ({ value }) =>
-      isObject(value) ?  this.for(value)
-                             .get(this.fields.category)
-                             .getOrElse('(Uncategorised)')
-      : /* else */       '(Uncategorised)';
-
-    return groupBy(sortedProperties(this.object), category)
-             .map(asCategoryObject)
-             .sort(byCategory);
+  /*~
+   * Retrieves a categorised list of properties in the current
+   * context.
+   *
+   * ---
+   * category: Additional reflective methods
+   * type: |
+   *   type PropertyKind is 'value' or 'getter' or 'setter'
+   *   type Property     is { name: String, value: Any, kind: PropertyKind }
+   *
+   *   Interface.() => Array { category: String, members: Array Property }
+   */
+  allProperties() {
+    return categoriseProperties(this, allEntriesOf(this.object));
   }
 })
 ```
@@ -800,6 +802,22 @@ Refinable.refine({
 
 ### Additional reflective methods
 
+
+
+
+#### [`allProperties()`](metamagical-interface/allProperties)
+
+
+
+```haskell
+type PropertyKind is 'value' or 'getter' or 'setter'
+type Property     is { name: String, value: Any, kind: PropertyKind }
+
+Interface.() => Array { category: String, members: Array Property }
+```
+
+Retrieves a categorised list of properties in the current
+context.
 
 
 
@@ -1049,7 +1067,7 @@ The current context of the Meta:Magical interface.
 
 
 
-#### `toString: .toString()`
+#### [`toString()`](refinable/toString)
 
 
 
@@ -1068,23 +1086,16 @@ A textual representation of this object.
 
 
 
-#### `refine: .refine(properties)`
+#### [`refine(properties)`](refinable/refine)
 
   - **Complexity:**
     O(n), `n` is the number of properties.
 
 ```haskell
-('a is Refinable).(Object Any) => (Object Any) <: 'a
+(a is Refinable).(Object Any) => (Object Any) <: a
 ```
 
 Constructs a new object that's enhanced with the given properties.
-The [[refine]] operation allows one to copy the receiver object,
-and enhance that copy with the provided properties, in a more
-convenient way than JavaScript's built-in [[Object.create]]:
-    const o1 = o.refine({ x: 1 });
-    const o2 = o1.refine({ x: 2 });
-    o1.x  // ==> 1
-    o2.x  // ==> 2
 
 
 

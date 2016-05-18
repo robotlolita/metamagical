@@ -1,47 +1,71 @@
 
 
-# (Anonymous)
+# allProperties()
+
+
+```javascript
+type PropertyKind is 'value' or 'getter' or 'setter'
+type Property     is { name: String, value: Any, kind: PropertyKind }
+
+Interface.() => Array { category: String, members: Array Property }
+```
 
 
 
 
+> 
+> **Stability: 1 - Experimental**
+> 
+> This feature is experimental and likely to change (or be removed) in the
+> future.
+> 
 
 
+  - **From:**
+    metamagical-interface
+  - **Defined in:**
+    Interface
   - **Copyright:**
-    
+    (c) 2016 Quildreen Motta
   - **Licence:**
-    
+    MIT
+  - **Repository:**
+    git://github.com/origamitower/metamagical.git
+  - **Category:**
+    Additional reflective methods
   - **Platforms:**
-    
+      - ECMAScript 2015
   - **Maintainers:**
-    
+      - Quildreen Motta <queen@robotlolita.me> (http://robotlolita.me/)
   - **Authors:**
-    
-
-
-(No documentation)
+      - Quildreen Motta <queen@robotlolita.me>
 
 
 
-## Properties in `(Anonymous)`
+Retrieves a categorised list of properties in the current
+context.
+
+
+
+## Source
+
+
+```javascript
+allProperties() {
+    return categoriseProperties(this, allEntriesOf(this.object));
+  }
+```
+
+
+
+
+## Properties in `allProperties()`
 
 
 
 
 ### (Uncategorised)
 
-
-
-
-#### `length`
-
-
-
-```haskell
-Number
-```
-
-(No documentation)
 
 
 
@@ -57,7 +81,7 @@ String
 
 
 
-#### [`prototype`](merge/prototype)
+#### `prototype`
 
 
 

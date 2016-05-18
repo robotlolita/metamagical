@@ -1,6 +1,6 @@
 {
   "name": "metamagical-interface",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "An interface for attaching metadata to JavaScript objects.",
   "main": "./lib/index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   "devDependencies": {},
   "dependencies": {
     "data.maybe": "^1.2.2",
-    "refinable": "^1.0.1"
+    "refinable": "^1.0.2"
   },
   "metamagical": {
     "copyright": "(c) 2016 Quildreen Motta",

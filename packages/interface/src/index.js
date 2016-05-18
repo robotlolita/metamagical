@@ -25,7 +25,6 @@ const symbols      = Object.getOwnPropertySymbols;
 const propertiesOf = Object.getOwnPropertyNames;
 const keys         = Object.keys;
 const hasProperty  = Function.call.bind(Object.prototype.hasOwnProperty);
-const descriptorOf = Object.getOwnPropertyDescriptor;
 const prototypeOf  = Object.getPrototypeOf;
 
 
@@ -133,13 +132,45 @@ function groupBy(values, groupingFn) {
 }
 
 /*~
- * Returns an array of `key, descriptor` pairs for all own properties
- * in an object.
- * ---
- * complexity: O(number of enumerable properties)
+ * Returns the descriptor searching upwards the prototype chain.
  */
-function entriesOf(object) {
-  return flatten(propertiesOf(object).map(name => {
+function descriptorOf(object, name) {
+  const descriptor = Object.getOwnPropertyDescriptor(object, name);
+  if (descriptor) {
+    return descriptor;
+  } else {
+    const proto = prototypeOf(object);
+    if (proto) {
+      return descriptorOf(proto, name);
+    } else {
+      return null;
+    }
+  }
+}
+
+/*~
+ * Returns an array of property names in an object.
+ * ---
+ * complexity: O(number of enumberable properties)
+ */
+function allPropertiesOf(object) {
+  function go(object) {
+    const proto = prototypeOf(object);
+
+    return proto       ?  propertiesOf(object).concat(go(proto))
+    :      /* else */     propertiesOf(object);
+  }
+
+  return Array.from(new Set(go(object)));
+}
+
+/*~
+ * Converts an array of property names into an array of Entry.
+ * ---
+ * complexity: O(properties.length)
+ */
+function toEntries(object, properties) {
+  return flatten(properties.map(name => {
     const p = descriptorOf(object, name);
 
     let result = [];
@@ -159,6 +190,26 @@ function entriesOf(object) {
 }
 
 /*~
+ * Returns an array of `key, descriptor` pairs for all own properties
+ * in an object.
+ * ---
+ * complexity: O(number of own properties)
+ */
+function entriesOf(object) {
+  return toEntries(object, propertiesOf(object));
+}
+
+/*~
+ * Returns an array of `key, descriptor` pairs for all properties
+ * in an object.
+ * ---
+ * complexity: O(number of properties)
+ */
+function allEntriesOf(object) {
+  return toEntries(object, allPropertiesOf(object));
+}
+
+/*~
  * Compares two comparable objects.
  */
 function compare(a, b) {
@@ -166,6 +217,27 @@ function compare(a, b) {
   :      a > b      ?   1
   :      /* else */     0;
 }
+
+/*~
+ * Returns a list of categories for the given properties.
+ */
+function categoriseProperties(meta, entries) {
+  const byName     = (a, b) => compare(a.name, b.name);
+  const byCategory = (a, b) => compare(a.category, b.category);
+
+  const asCategoryObject = ([category, members]) => ({ category, members });
+
+  const category = ({ value }) =>
+    isObject(value) ?  meta.for(value)
+                           .get(meta.fields.category)
+                           .getOrElse('(Uncategorised)')
+    : /* else */       '(Uncategorised)';
+
+  return groupBy(entries.sort(byName), category)
+           .map(asCategoryObject)
+           .sort(byCategory);
+}
+
 
 // --[ The Meta:Magical Interface ]------------------------------------
 
@@ -895,21 +967,23 @@ const Interface = Refinable.refine({
    *   Interface.() => Array { category: String, members: Array Property }
    */
   properties() {
-    const byName     = (a, b) => compare(a.name, b.name);
-    const byCategory = (a, b) => compare(a.category, b.category);
+    return categoriseProperties(this, entriesOf(this.object));
+  },
 
-    const sortedProperties = (object) => entriesOf(object).sort(byName);
-    const asCategoryObject = ([category, members]) => ({ category, members });
-
-    const category = ({ value }) =>
-      isObject(value) ?  this.for(value)
-                             .get(this.fields.category)
-                             .getOrElse('(Uncategorised)')
-      : /* else */       '(Uncategorised)';
-
-    return groupBy(sortedProperties(this.object), category)
-             .map(asCategoryObject)
-             .sort(byCategory);
+  /*~
+   * Retrieves a categorised list of properties in the current
+   * context.
+   *
+   * ---
+   * category: Additional reflective methods
+   * type: |
+   *   type PropertyKind is 'value' or 'getter' or 'setter'
+   *   type Property     is { name: String, value: Any, kind: PropertyKind }
+   *
+   *   Interface.() => Array { category: String, members: Array Property }
+   */
+  allProperties() {
+    return categoriseProperties(this, allEntriesOf(this.object));
   }
 });
 

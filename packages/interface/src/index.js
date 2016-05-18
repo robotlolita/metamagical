@@ -69,24 +69,6 @@ function isObject(x) {
 
 
 /*~
- * Returns an array of own values in an object.
- * ---
- * complexity: O(n), `n` is the number of own properties in `object`
- */
-function values(object) {
-  return propertiesOf(object).map(key => object[key]);
-}
-
-
-/*~
- * Lifts a regular binary function in the domain of Maybe values.
- */
-function maybeLift2(maybeA, maybeB, fn) {
-  return maybeA.chain(a => maybeB.map(b => fn(a, b)));
-}
-
-
-/*~
  * Flattens one level of a list of lists.
  * ---
  * complexity: O(`xss.length`)
@@ -102,17 +84,6 @@ function flatten(xss) {
 function hasOwnSymbol(object, symbol) {
   return symbols(object).indexOf(symbol) !== -1;
 }
-
-
-/*~
- * Removes duplicate values from a list.
- * ---
- * complexity: O(`xs.length`)
- */
-function unique(xs) {
-  return Array.from(new Set(xs));
-}
-
 
 /*~
  * Groups values based on the grouping function provided.

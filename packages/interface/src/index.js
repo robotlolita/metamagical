@@ -51,7 +51,9 @@ function getMeta(object) {
   assertObject(object);
 
   let data = {};
-  Object.assign(data, object[metaSymbol] || {});
+  if (hasOwnSymbol(object, metaSymbol)) {
+    Object.assign(data, object[metaSymbol] || {});
+  }
   Object.assign(data, metadata.get(object) || {});
 
   return data;

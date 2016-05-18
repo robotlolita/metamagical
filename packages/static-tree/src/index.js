@@ -34,6 +34,10 @@ module.exports = function(meta, name, root, options = {}) {
     return meta.for(object).get(meta.fields.isModule).getOrElse(false);
   }
 
+  function isDocumented(object) {
+    return meta.for(object).get(meta.fields.documentation).map(_ => true).getOrElse(false);
+  }
+
   function allowsPopping(path) {
     return (path[0] === '(unknown module)' && path.length > 1)
     ||     path.length > 0;
@@ -65,6 +69,9 @@ module.exports = function(meta, name, root, options = {}) {
 
   function go(where, name, object, path) {
     if (!isObject(object) || skip.has(object)) {
+      return;
+    }
+    if (!isDocumented(object) && options.skipUndocumented) {
       return;
     }
     if (references.has(object)) {

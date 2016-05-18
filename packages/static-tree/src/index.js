@@ -10,7 +10,7 @@
 /*~
  */
 module.exports = function(meta, name, root, options = {}) {
-  let result     = {};
+  let result     = Object.create(null);
   let references = new Map(options.references ? options.references.entries() : []);
   let skip       = options.skip || new Set();
 
@@ -48,16 +48,17 @@ module.exports = function(meta, name, root, options = {}) {
     references.set(object, [...parentPath, name].join('/'));
 
     let where = parentPath.reduce((container, key) => {
-      container[key] = container[key] || { };
+      container[key] = container[key] || Object.create(null);
       if (!container[key].children) {
-        container[key].children = {};
+        container[key].children = Object.create(null);
       }
       return container[key].children;
     }, result);
 
-    where[name] = where[name] || { children: {} };
-    where[name].type   = 'object';
-    where[name].object = object;
+    where[name] = where[name] || Object.create(null);
+    where[name].type     = 'object';
+    where[name].object   = object;
+    where[name].children = where[name].children || Object.create(null);
 
     return where[name];
   }
@@ -67,16 +68,19 @@ module.exports = function(meta, name, root, options = {}) {
       return;
     }
     if (references.has(object)) {
-      where[name] = { reference: references.get(object), type: 'reference' };
+      where[name]           = Object.create(null);
+      where[name].type      = 'reference';
+      where[name].reference = references.get(object);
     } else {
       let data = insertObject(name, path, object);
-      meta.for(object).properties().forEach(({ members }) => members.forEach(p =>
-        go(data.children, p.name, p.value, [...path, name])
-      ));
+      meta.for(object).allProperties().forEach(({ members }) => members.forEach(p => {
+        go(data.children, p.name, p.value, [...path, name]);
+      }));
     }
   }
 
   go(result, name, root, []);
+
   return {
     references,
     tree: result

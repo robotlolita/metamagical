@@ -414,8 +414,8 @@ module.exports = function({ types: t }) {
     :      /* else */          null  // TODO: parse npm's repo syntax
   }
 
-  function inferFileAttributes(path) {
-    const file = path.hub.file.opts.filename;
+  function inferFileAttributes(babelPath) {
+    const file = babelPath.hub.file.opts.filename;
     const pkg  = readPackage(file);
 
     if (!pkg || !pkg.file || !pkg.contents) {
@@ -426,8 +426,8 @@ module.exports = function({ types: t }) {
       return Object.assign(
         compact({
           location: Object.assign({
-            filename: file,
-          }, path.node.loc || {}),
+            filename: path.relative(root, file),
+          }, babelPath.node.loc || {}),
           module:     computeModuleId(p.name, root, file),
           homepage:   p.homepage,
           licence:    p.license || p.licence,

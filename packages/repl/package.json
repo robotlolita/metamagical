@@ -1,0 +1,22 @@
+{
+  "name": "metamagical-repl",
+  "version": "0.1.0",
+  "description": "A REPL browser for Meta:Magical.",
+  "main": "./lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/origamitower/metamagical.git"
+  },
+  "author": "Quildreen Motta",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/origamitower/metamagical/issues"
+  },
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "folktale": "^2.0.0-alpha1",
+    "marked": "^0.3.5",
+    "marked-terminal": "^1.6.1",
+    "refinable": "^1.0.2"
+  }
+}

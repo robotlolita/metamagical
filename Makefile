@@ -54,6 +54,9 @@ compile-mkdocs:
 compile-static-tree:
 	PACKAGES=packages/static-tree $(MAKE) compile
 
+compile-repl:
+	PACKAGES=packages/repl $(MAKE) compile
+
 clean:
 	rm -r packages/**/lib
 

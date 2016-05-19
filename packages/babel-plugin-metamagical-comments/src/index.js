@@ -609,6 +609,7 @@ module.exports = function({ types: t }) {
               inferSignature(expr.right, toIdentifier(name)),
               parent,
               hasParent ? {} : inferFileAttributes(path),
+              isModuleExports(expr.left) ? { isModule: true } : { },
               meta
             )
           }).expression

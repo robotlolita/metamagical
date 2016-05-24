@@ -509,6 +509,27 @@ module.exports = {
   }),
 
   /*~
+   * Tells whether the object has an implementation or requires one
+   * to be provided.
+   *
+   * This is used for getters and methods, so tools can tell users the
+   * expectations of an object, and avoid running code that hasn't been
+   * defined yet.
+   *
+   * This annotation can neither be inherited nor propagated.
+   *
+   * ---
+   * category  : Definition Metadata
+   * stability : experimental
+   * type: Field Boolean
+   */
+  isRequired: Field.refine({
+    name: 'isRequired',
+    allowInheritance: false,
+    allowPropagation: false
+  }),
+
+  /*~
    * Provides the object that defines the annotated object.
    *
    * In JavaScript we can't ask an object where it's defined, and

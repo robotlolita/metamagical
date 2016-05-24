@@ -305,7 +305,7 @@ function categoriseProperties(meta, entries) {
  *     // ==> 'Interface'
  *
  * At any point you can use the `object` method to retrieve the
- * object the interface is looking at:
+ * object the interface is looking at::
  *
  *     Interface.object
  *     // ==> Interface
@@ -336,7 +336,7 @@ function categoriseProperties(meta, entries) {
  * `get`, they can retrieve the broader context in which this function
  * lives::
  *
- *     const getMeta = Interface.forObject(Interface.get);
+ *     const getMeta = Interface.for(Interface.get);
  *     getMeta.getByName('belongsTo').getOrElse(null)();
  *     // ==> Interface
  *
@@ -349,7 +349,7 @@ function categoriseProperties(meta, entries) {
  *       licence: 'CC0'
  *     };
  *
- *     Interface.for(root.child).getInherited('licence').getOrElse(null);
+ *     Interface.for(root.child).getInheritedMeta('licence').getOrElse(null);
  *     // ==> 'CCO'
  *
  *
@@ -374,7 +374,7 @@ function categoriseProperties(meta, entries) {
  *     root.childA[Symbol.for('@@meta:magical')] = {
  *       stability: 'experimental'
  *     };
- *     root.childB[Symbol.for('@@meta:magical')] = {
+ *     root.childA.childB[Symbol.for('@@meta:magical')] = {
  *       stability: 'stable'
  *     };
  *
@@ -406,7 +406,7 @@ function categoriseProperties(meta, entries) {
  *     root.childA[Symbol.for('@@meta:magical')] = {
  *       stability: 'experimental'
  *     };
- *     root.childB[Symbol.for('@@meta:magical')] = {
+ *     root.childA.childB[Symbol.for('@@meta:magical')] = {
  *       stability: 'stable'
  *     };
  *
@@ -677,10 +677,10 @@ const Interface = Refinable.refine({
    *       childA: { },
    *       childB: { }
    *     };
-   *     childA[Symbol.for('@@meta:magical')] = {
+   *     root.childA[Symbol.for('@@meta:magical')] = {
    *       stability: 'experimental'
    *     };
-   *     childA[Symbol.for('@@meta:magical')] = {
+   *     root.childB[Symbol.for('@@meta:magical')] = {
    *       stability: 'stable'
    *     };
    *

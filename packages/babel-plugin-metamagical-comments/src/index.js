@@ -191,23 +191,41 @@ function isExampleLeadingParagraph(node) {
   &&     /::\s*$/.test(node.text)
 }
 
-function inferExampleName(node) {
-  if (!node || node.type !== 'heading') {
-    return null;
-  } else {
-    return node.text.replace(/::[ \t]*$/m, '');
-  }
-}
-
 function collectExamples(documentation) {
   const ast = marked.lexer(documentation);
 
-  return ast.map((node, i) => [node, ast[i - 1]])
-            .filter(([node, prev]) => node.type === 'code' && isExampleLeadingParagraph(prev))
-            .map(([node, previous]) => ({
-              source: node.text,
-              name: inferExampleName(previous)
-            }));
+  const [xs, x, name] = ast.reduce(([examples, current, heading, nextNodeIsExample], node) => {
+    if (node.type === 'code') {
+      if (nextNodeIsExample) {
+        return [examples, [...current, node.text], heading, false];
+      } else {
+        return [examples, current, heading, false];
+      }
+    } else if (node.type === 'heading') {
+      return [
+        examples.concat({
+          name: heading,
+          source: current.join('\n\n')
+        }),
+        [],
+        node.text,
+        isExampleLeadingParagraph(node)
+      ];
+    } else if (node.type === 'paragraph') {
+      return [examples, current, heading, isExampleLeadingParagraph(node)];
+    } else {
+      return [examples, current, heading, false];
+    }
+  }, [[], [], null, false]);
+
+  if (x.length === 0) {
+    return xs;
+  } else {
+    return [...xs, {
+      name: name,
+      source: x.join('\n\n')
+    }];
+  }
 }
 
 function Raw(value) {

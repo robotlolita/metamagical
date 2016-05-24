@@ -2,3 +2,5 @@ node_modules/
 *.tern-port
 /packages/**/lib/
 /packages/**/test/spec/
+/experimental/**/lib/
+/experimental/**/test/spec/

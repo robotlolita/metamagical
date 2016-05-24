@@ -501,7 +501,6 @@ function categoriseProperties(meta, entries) {
  * stability : experimental
  * module    : metamagical-interface
  * category  : Metadata
- * isModule  : true
  * platforms:
  *   - ECMAScript 2015
  */
@@ -539,7 +538,8 @@ const Interface = Refinable.refine({
    *     Interface.for(x).get('name'); // ==> 'x'
    *
    * ---
-   * category: State and configuration
+   * category  : State and configuration
+   * stability : stable
    *
    * seeAlso:
    *   - type: entity
@@ -570,7 +570,8 @@ const Interface = Refinable.refine({
    *     xMeta.get('name'); // ==> 'x'
    *
    * ---
-   * category: State and configuration
+   * category  : State and configuration
+   * stability : stable
    *
    * seeAlso:
    *   - type: entity
@@ -605,7 +606,8 @@ const Interface = Refinable.refine({
    *     // ==> 'Anonymous'
    *
    * ---
-   * category: Auxiliary methods for querying metadata
+   * category  : Auxiliary methods for querying metadata
+   * stability : stable
    * type: |
    *   Interface.(String) => Maybe Any
    */
@@ -650,7 +652,8 @@ const Interface = Refinable.refine({
    *     // ==> 'Uncategorised'
    *
    * ---
-   * category: Auxiliary methods for querying metadata
+   * category  : Auxiliary methods for querying metadata
+   * stability : experimental
    * type: |
    *   Interface.(String) => Maybe Any
    */
@@ -687,6 +690,7 @@ const Interface = Refinable.refine({
    * ---
    * category   : Auxiliary methods for querying metadata
    * complexity : O(n), `n` is the number of obects inside the current context
+   * stability  : experimental
    *
    * type: |
    *   Interface.(String) => Array Any
@@ -734,6 +738,7 @@ const Interface = Refinable.refine({
    * ---
    * category   : Querying metadata
    * complexity : O(n), `n` is the number of objects inside the current context
+   * stability  : experimental
    *
    * type: |
    *   Interface.(Field) => Maybe Any
@@ -755,6 +760,7 @@ const Interface = Refinable.refine({
    * ---
    * category   : Querying metadata
    * complexity : O(n), `n` is the number of objects inside the current context
+   * stability  : experimental
    *
    * type: |
    *   Interface.(String) => Maybe Any
@@ -788,7 +794,8 @@ const Interface = Refinable.refine({
    * > | limitations described in the `Interface`.
    *
    * ---
-   * category: Querying and updating metadata
+   * category  : Querying and updating metadata
+   * stability : experimental
    *
    * seeAlso:
    *   - type: entity
@@ -832,7 +839,8 @@ const Interface = Refinable.refine({
    * > | limitations described in the `Interface`.
    *
    * ---
-   * category: Querying and updating metadata
+   * category  : Querying and updating metadata
+   * stability : experimental
    *
    * type: |
    *   (a is Interface).(String, Object Any) => Interface :: mutates a
@@ -853,7 +861,8 @@ const Interface = Refinable.refine({
    *      // ==> Interface.get
    *
    * ---
-   * category: Navigating the context
+   * category  : Navigating the context
+   * stability : experimental
    * type: |
    *   Interface.(String) => Maybe Interface
    */
@@ -874,7 +883,8 @@ const Interface = Refinable.refine({
    *     // ==> valueGetter
    *
    * ---
-   * category: Navigating the context
+   * category  : Navigating the context
+   * stability : experimental
    * type: |
    *   Interface.(String) => Maybe Interface
    */
@@ -894,7 +904,8 @@ const Interface = Refinable.refine({
    *     // ==> valueSetter
    *
    * ---
-   * category: Navigating the context
+   * category  : Navigating the context
+   * stability : experimental
    * type: |
    *   Interface.(String) => Maybe Interface
    */
@@ -914,7 +925,8 @@ const Interface = Refinable.refine({
    *     // ==> x
    *
    * ---
-   * category: Navigating the context
+   * category  : Navigating the context
+   * stability : experimental
    * type: |
    *   Interface.() => Maybe Interface
    */
@@ -932,7 +944,8 @@ const Interface = Refinable.refine({
    * context.
    *
    * ---
-   * category: Additional reflective methods
+   * category  : Additional reflective methods
+   * stability : experimental
    * type: |
    *   type PropertyKind is 'value' or 'getter' or 'setter'
    *   type Property     is { name: String, value: Any, kind: PropertyKind }
@@ -948,7 +961,8 @@ const Interface = Refinable.refine({
    * context.
    *
    * ---
-   * category: Additional reflective methods
+   * category  : Additional reflective methods
+   * stability : experimental
    * type: |
    *   type PropertyKind is 'value' or 'getter' or 'setter'
    *   type Property     is { name: String, value: Any, kind: PropertyKind }

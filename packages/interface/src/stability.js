@@ -18,11 +18,9 @@ const Refinable = require('refinable');
  * Handles describing and normalising stability identifiers.
  *
  * ---
- * name        : module stability
- * module      : metamagical-interface/lib/stability
- * isModule    : true
- * category    : Metadata
- * portability : portable
+ * name     : module stability
+ * module   : metamagical-interface/lib/stability
+ * category : Metadata
  * platforms:
  *   - ECMAScript 5
  *   - ECMAScript 3 (with `es5-shim`)
@@ -51,12 +49,16 @@ module.exports = Refinable.refine({
   /*~
    * An index of valid stability identifiers.
    *
+   * Meta:Magical uses [Node's stability index](https://nodejs.org/dist/latest-v4.x/docs/api/documentation.html#documentation_stability_index)
+   *
    * ---
    * stability : stable
    * category  : Stability index
    */
   index: {
     /*~
+     * Describes deprecated features.
+     *
      * ---
      * stability : stable
      * category  : Stability entry
@@ -71,6 +73,8 @@ on it.`
     }),
 
     /*~
+     * Describes experimental features.
+     *
      * ---
      * stability : stable
      * category  : Stability entry
@@ -84,6 +88,8 @@ future.`
     }),
 
     /*~
+     * Describes stable features.
+     *
      * ---
      * stability : stable
      * category  : Stability entry
@@ -99,6 +105,8 @@ backwards compatibility with the system, and a well-defined and automated
     }),
 
     /*~
+     * Describes locked features.
+     *
      * ---
      * stability : stable
      * category  : Stability entry

@@ -1,7 +1,4 @@
-Meta:Magical
-===============
-
-[![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion)![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg?style=flat-square)![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+# Meta:Magical [![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) ![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg?style=flat-square) ![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
 
 
 > **WARNING**  

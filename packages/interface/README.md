@@ -1,52 +1,65 @@
-# The Meta:Magical Interface
-
-> **NOTE**  
-> This specification is a draft.
+# The Meta:Magical Interface [![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) [![Build status](https://img.shields.io/travis/origamitower/folktale/master.svg?style=flat-square)](https://travis-ci.org/origamitower/folktale) [![NPM version](https://img.shields.io/npm/v/folktale.svg?style=flat-square)](https://npmjs.org/package/folktale) [![Dependencies status](https://img.shields.io/david/origamitower/folktale.svg?style=flat-square)](https://david-dm.org/origamitower/folktale) ![Licence](https://img.shields.io/npm/l/folktale.svg?style=flat-square&label=licence) ![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
 
 
-The Meta:Magical interface describes how one may attach meta-data to
-objects in JavaScript, which can later be queried by other code to
-provide more powerful development tools, like interactive documentation
-browsing or testing.
+The Meta:Magical interface provides the basic features for annoatating live
+objects, and querying metadata attached to them. This project is not meant
+for end users, but rather for tooling developers who want to use this information
+in their tools.
 
 
-## Approach
+## Documentation
 
-Objects in JavaScript don't have a field for meta-data, like you have in
-Clojure or Siren, but with ECMAScript 2015 Symbols and WeakMaps, it's
-possible to circumvent this and attach meta-data to an object in a way
-that is safe for non-owned objects, and doesn't cause collisions in
-owned objects.
+To learn about the Interface, you can use the REPL browser. Before you can do
+that you'll need to download and build this project:
 
+```shell
+git clone https://github.com/origamitower/metamagical.git
+cd metamagical
+npm install     # install build tooling
+make all        # compiles all sub projects
+```
 
-### Meta-data for your own objects
+Then launch a Node REPL to browse the project:
 
-For objects that you own, Meta:Magical relies on the existence of a
-property with the global `@@meta:magical` symbol
-(`Symbol.for('@@meta:magical')`). Since the symbol is global to the
-entire runtime, it doesn't matter where it's created, things will always
-be the same. Furthermore, being a symbol means that name collisions with
-regular properties are not possible — even if the choice of name already
-makes that fairly unlikely.
+```js
+node> var Interface = require('./packages/interface')
+node> var browser = require('./packages/repl')
+node> browser.browse(Interface).summary()
 
-The value pointed by the symbol is an object that provides the
-meta-data. Meta:Magical specifies some fields in this object as having
-special meaning, users are free to use any other field as they see
-fit.
+# Interface
+===========
 
 
-### Meta-data for thirdy-party objects
+Stability: 1 - Experimental
+Platforms: 
+    • ECMAScript 2015
 
-For objects that you don't own, Meta:Magical stores the meta-data in a
-global WeakMap. This allows Meta:Magical to keep track of meta-data on
-objects without mutating those objects, so it can support immutable
-(frozen / non-extensible) objects, native objects, and others that you'd
-rather not change.
+The Meta:Magical interface allows one to query meta-data associated
+with a particular object, or attach new meta-data to any object
+without modifying the object.
 
-> **WARNING**  
-> 
-> The global WeakMap relies on there existing only one instance of the
-> `metamagical` module in your entire program. This relies on both the `require`
-> cache not being cleared, and the resolution algorithm always resolving the
-> identifier `metamagical` to the very same file. **It IS brittle**, but so far
-> I don't have any other idea of how to solve this problem in JavaScript.
+## Properties
+-------------
+
+### Additional reflective methods
+
+    • allProperties()
+      | Retrieves a categorised list of properties in the current
+   context.
+   
+    • properties()
+      | Retrieves a categorised list of properties owned by the current
+   context.
+
+( ... )
+```
+
+To read the full documentation, use the `.documentation()` method of the
+browser.
+
+
+## Licence
+
+Meta:Magical is copyright (c) Quildreen Motta, 2016, and released under the MIT
+licence. See the `LICENCE` file in this repository for detailed information.
+

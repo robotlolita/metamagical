@@ -12,8 +12,6 @@ const Browser = require('./browser');
 
 
 // --[ Module ]--------------------------------------------------------
-module.exports = {
-  browse(metadata) {
-    return Browser.for(metadata);
-  }
+module.exports = function(metamagical) {
+  return Browser.for(metamagical.for(Browser));
 };

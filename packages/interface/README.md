@@ -23,7 +23,7 @@ Then launch a Node REPL to browse the project:
 
 ```js
 node> var Interface = require('./packages/interface')
-node> var browser = require('./packages/repl')
+node> var browser = require('./packages/repl')(Interface)
 node> browser.browse(Interface).summary()
 
 # Interface
@@ -37,6 +37,9 @@ Platforms:
 The Meta:Magical interface allows one to query meta-data associated
 with a particular object, or attach new meta-data to any object
 without modifying the object.
+
+    (run `.documentation()` for the full docs)
+
 
 ## Properties
 -------------
@@ -53,9 +56,6 @@ without modifying the object.
 
 ( ... )
 ```
-
-To read the full documentation, use the `.documentation()` method of the
-browser.
 
 
 ## Licence

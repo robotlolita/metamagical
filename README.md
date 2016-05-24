@@ -249,7 +249,7 @@ export default function(Interface) {
 }
 ```
 
-```
+```js
 // The client
 const Interface = require('metamagical-interface');
 import ModuleFactory from 'your-module';

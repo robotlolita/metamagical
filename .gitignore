@@ -1,4 +1,4 @@
 node_modules/
 *.tern-port
-lib/
+/packages/**/lib/
 /packages/**/test/spec/

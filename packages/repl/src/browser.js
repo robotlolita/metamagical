@@ -312,6 +312,8 @@ const Browser = Refinable.refine({
           Nil(),
           this._synopsis().map(Text).getOrElse(null),
           Nil(),
+          Quote(Text('(run `.documentation()` for the full docs)')),
+          Nil(),
           Block(0, [
             Title(2, Text('Properties')),
             this._renderProperties(3, this.metadata.allProperties())

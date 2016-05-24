@@ -7,15 +7,9 @@
 //
 //----------------------------------------------------------------------
 
-const properties = Object.getOwnPropertyNames;
-
 
 function isObject(object) {
   return Object(object) === object;
-}
-
-function values(object) {
-  return properties(object).map(key => object[key]);
 }
 
 function groupBy(xs, f) {
@@ -39,6 +33,15 @@ function exampleDescription(example) {
 
 module.exports = (meta, describe, it) => (object) => {
   let visited = new Set();
+  const _ = meta.fields;
+
+  function isProvided(kind, value) {
+    if (kind !== 'getter') {
+      return isObject(value);
+    } else {
+      return !meta.for(value).get(_.isRequired).getOrElse(false);
+    }
+  }
 
   function defineTests(object) {
     if (!isObject(object) || visited.has(object))  return;
@@ -47,20 +50,27 @@ module.exports = (meta, describe, it) => (object) => {
 
     visited.add(object);
 
-    m.get(m.fields.name).chain(name => {
-      describe(name, () => {
-        m.get(m.fields.examples).chain(examples => {
-          groupBy(examples, exampleDescription).forEach(([k, fs]) => {
-            it(k, () => {
-              fs.forEach(f => f.call());
-            });
-          });
-        });
+    m.get(_.examples).chain(examples => {
+      const exampleGroups = groupBy(examples, exampleDescription);
+      exampleGroups.forEach(([heading, functions]) => {
+        it(heading, () => functions.forEach(f => f.call()));
+      });
+    });
 
-        values(object).forEach(defineTests);
+    m.properties().forEach(({ category, members }) => {
+      describe(`(${category})`, () => {
+        members.forEach(({ name, kind, value }) => {
+          if (isProvided(kind, value)) {
+            describe(`.${name}`, () => defineTests(value));
+          }
+        });
       });
     });
   }
 
-  defineTests(object);
+  meta.for(object).get(_.name).chain(name => {
+    describe(`Examples in ${name}`, () => {
+      defineTests(object);
+    });
+  });
 };

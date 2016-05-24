@@ -18,5 +18,23 @@
 # --[ Qualifiers ]-----------------------------------------------------
 # Changes may be qualified
 
-- (! break) The change breaks an existing feature
+- (!! important) The commit introduces substantial changes.
+- (break) The change breaks an existing feature
 - (- minor) The change is rather minor and may be ignored in most cases
+
+# --[ Scopes ]---------------------------------------------------------
+# Because this is a multi-package repository, sometimes changes apply
+# to only a few of these scopes. These labels exist for that reason
+
+- (scoped) The scope of changes.
+  - (iface interface) The Meta:Magical interface.
+  - (repl) The REPL browser
+  - (mocha) The Mocha bridge
+  - (mmdoc babel-comments) The Meta:Magical comments babel plugin
+  - (assert babel-assertion) The assertion comments plugin
+  
+  # The packages below are experimental
+  - (mdjs markdown) The markdown→JS compiler
+  - (mkdocs) The mkdocs generator
+  - (sphinx) The Sphinx generator
+  - (tree) The static-tree library

@@ -1,4 +1,10 @@
-# The Meta:Magical Interface [![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) [![Build status](https://img.shields.io/travis/origamitower/folktale/master.svg?style=flat-square)](https://travis-ci.org/origamitower/folktale) [![NPM version](https://img.shields.io/npm/v/folktale.svg?style=flat-square)](https://npmjs.org/package/folktale) [![Dependencies status](https://img.shields.io/david/origamitower/folktale.svg?style=flat-square)](https://david-dm.org/origamitower/folktale) ![Licence](https://img.shields.io/npm/l/folktale.svg?style=flat-square&label=licence) ![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+# The Meta:Magical Interface 
+
+[![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) 
+[![Build status](https://img.shields.io/travis/origamitower/metamagical/master.svg?style=flat-square)](https://travis-ci.org/origamitower/metamagical) 
+[![NPM version](https://img.shields.io/npm/v/metamagical-interface.svg?style=flat-square)](https://npmjs.org/package/metamagical-interface) 
+![Licence](https://img.shields.io/npm/l/metamagical-interface.svg?style=flat-square&label=licence) 
+![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
 
 
 The Meta:Magical interface provides the basic features for annoatating live
@@ -31,7 +37,7 @@ node> browser.browse(Interface).summary()
 
 
 Stability: 1 - Experimental
-Platforms: 
+Platforms:
     • ECMAScript 2015
 
 The Meta:Magical interface allows one to query meta-data associated
@@ -49,13 +55,31 @@ without modifying the object.
     • allProperties()
       | Retrieves a categorised list of properties in the current
    context.
-   
+
     • properties()
       | Retrieves a categorised list of properties owned by the current
    context.
 
 ( ... )
 ```
+
+
+## Support
+
+If you think you've found a bug in the project, or want to voice your
+frustration about using it (maybe the documentation isn't clear enough? Maybe
+it takes too much effort to use?), feel free to open a new issue in the
+[Github issue tracker](https://github.com/origamitower/metamagical/issues).
+
+Pull Requests are welcome. By submitting a Pull Request you agree with releasing
+your code under the MIT licence.
+
+You can join the [Gitter Channel](https://gitter.im/origamitower/discussion) for quick support.
+You can contact the author over [email](mailto:queen@robotlolita.me), or
+[Twitter](https://twitter.com/robotlolita).
+
+Note that all interactions in this project are subject to Origami Tower's
+[Code of Conduct](https://github.com/origamitower/metamagical/blob/master/CODE_OF_CONDUCT.md).
 
 
 ## Licence

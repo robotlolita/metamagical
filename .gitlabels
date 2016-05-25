@@ -22,6 +22,7 @@
 - (!! important) The commit introduces substantial changes.
 - (break) The change breaks an existing feature
 - (- minor) The change is rather minor and may be ignored in most cases
+- (release) A new public release
 
 # --[ Scopes ]---------------------------------------------------------
 # Because this is a multi-package repository, sometimes changes apply

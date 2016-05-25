@@ -13,6 +13,22 @@ for end users, but rather for tooling developers who want to use this informatio
 in their tools.
 
 
+## Installing
+
+The only supported way to install the transform plugin is through [npm][].
+
+> **NOTE**  
+> If you don't have npm yet, you'll need to install [Node.js][]. All newer
+> versions (4+) of Node come with npm.
+
+```shell
+$ npm install metamagical-interface
+```
+
+[npm]: https://www.npmjs.com/
+[Node.js]: nodejs.org
+
+
 ## Documentation
 
 To learn about the Interface, you can use the REPL browser. Before you can do

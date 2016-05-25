@@ -9,7 +9,7 @@ versions.
 
 ## 0.x
 
-### [0.11.0] - 2016-05-25
+### [0.11.1] - 2016-05-25
 
 The first stable release of the plugin, features:
 

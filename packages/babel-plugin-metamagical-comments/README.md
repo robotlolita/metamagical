@@ -1,8 +1,11 @@
 # Meta:Magical Babel Plugin
 
-[![NPM version](https://img.shields.io/npm/v/babel-plugin-transform-metamagical-comments.svg?style=flat-square)](https://npmjs.org/package/babel-plugin-transform-metamagical-comments)
-![Licence](https://img.shields.io/npm/l/babel-plugin-transform-metamagical-comments.svg?style=flat-square&label=licence)
-![Stability: Stable](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+[![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) 
+[![Build status](https://img.shields.io/travis/origamitower/metamagical/master.svg?style=flat-square)](https://travis-ci.org/origamitower/metamagical) 
+[![NPM version](https://img.shields.io/npm/v/babel-plugin-transform-metamagical-comments.svg?style=flat-square)](https://npmjs.org/package/babel-plugin-transform-metamagical-comments) 
+![Licence](https://img.shields.io/npm/l/babel-plugin-transform-metamagical-comments.svg?style=flat-square&label=licence) 
+![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+
 
 This plugin allows describing Meta:Magical meta-data using doc comments, by
 having Babel compile the doc comments to runtime annotations.
@@ -31,18 +34,16 @@ having Babel compile the doc comments to runtime annotations.
  * > Composition is done from right to left, rather than left to right.
  *
  * ---
- * signature: compose(f, g)(value)
- * type: (β -> γ, α -> β) -> α -> γ
  * category: Combinators
  * tags: ["Lambda Calculus"]
  * stability: stable
- * platforms: ["ECMAScript"]
- * licence: MIT
+ * type: ('b => 'c, 'a => 'b) => 'a => 'c
  */
 const compose = (f, g) => (value) => f(g(value))
 ```
 
-Compiles down to:
+Compiles down to (with properties inferred from the source definition and
+package.json):
 
 ```js
 var compose = function compose(f, g) {
@@ -51,8 +52,9 @@ var compose = function compose(f, g) {
   };
 };
 compose[Symbol.for("@@meta:magical")] = {
-  "signature": "compose(f, g)(value)",
-  "type": "(β -> γ, α -> β) -> α -> γ",
+  "name": "compose",
+  "signature": "compose(f, g)",
+  "type": "('b => 'c, 'a => 'b) => 'a => 'c",
   "category": "Combinators",
   "tags": ["Lambda Calculus"],
   "stability": "stable",
@@ -177,15 +179,6 @@ function f(...) { ... }
 The transform plugin requires Node 4+ and Babel 6+.
 
 
-
-## Known Limitations
-
-This plugin is not entirely done yet, the following is a list of current limitations:
-
-- Doesn't support object methods, getters, or arrows yet;
-- Limited meta-data inference (name, signature, source);
-
-
 ## Support
 
 If you think you've found a bug in the project, or want to voice your
@@ -196,11 +189,12 @@ it takes too much effort to use?), feel free to open a new issue in the
 Pull Requests are welcome. By submitting a Pull Request you agree with releasing
 your code under the MIT licence.
 
+You can join the [Gitter Channel](https://gitter.im/origamitower/discussion) for quick support.
 You can contact the author over [email](mailto:queen@robotlolita.me), or
 [Twitter](https://twitter.com/robotlolita).
 
 Note that all interactions in this project are subject to Origami Tower's
-[Code of Conduct](https://github.com/origamitower/conventions/blob/master/code-of-conduct.md).
+[Code of Conduct](https://github.com/origamitower/metamagical/blob/master/CODE_OF_CONDUCT.md).
 
 
 ## Licence

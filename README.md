@@ -1,4 +1,4 @@
-# Meta:Magical [![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) [![Build Status](https://travis-ci.org/origamitower/metamagical.svg?branch=master)](https://travis-ci.org/origamitower/metamagical) ![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg?style=flat-square) ![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+# Meta:Magical [![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) [![Build status](https://img.shields.io/travis/origamitower/metamagical/master.svg?style=flat-square)](https://travis-ci.org/origamitower/metamagical) ![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg?style=flat-square) ![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
 
 
 > **WARNING**  

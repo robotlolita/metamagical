@@ -1,12 +1,20 @@
+.PHONY: help
 help:
+	@echo "--[ CONFIGURATION ]------------------------------------------"
+	@echo "You may configure the build with the following environment"
+	@echo "variables:"
 	@echo ""
-	@echo "AVAILABLE TASKS"
+	@echo "  MM_EXPERIMENTAL_PACKAGES ..... Include experimental packages"
 	@echo ""
-	@echo "  compile ................ Compiles the project."
-	@echo "  clean .................. Removes build artifacts."
-	@echo "  test ................... Runs the tests for the project."
-	@echo "  test-watch ............. Runs the tests on every change."
-	@echo "  lint ................... Lints all source files."
+	@echo ""
+	@echo "--[ AVAILABLE TASKS ]----------------------------------------"
+	@echo ""
+	@echo "  install .............. Installs all dependencies"
+	@echo "  lint ................. Lints selected packages"
+	@echo "  build ................ Builds selected packages"
+	@echo "  test ................. Tests selected packages"
+	@echo "  clean-test ........... Re-installs, re-builds, and runs tests"
+	@echo "  clean ................ Removes build artifacts from selected packages"
 	@echo ""
 
 
@@ -16,49 +24,42 @@ babel   := $(bin)/babel
 eslint  := $(bin)/eslint
 mocha   := $(bin)/mocha
 
+
 # -- [ CONFIGURATION ] -------------------------------------------------
-ifndef PACKAGES
-	export PACKAGES = $(wildcard packages/*)
+ifndef MM_PACKAGES
+ifeq ($(MM_EXPERIMENTAL_PACKAGES),true)
+  export MM_PACKAGES = $(wildcard packages/* experimental/*)
+else
+  export MM_PACKAGES = $(wildcard packages/*)
+endif
 endif
 
+
 # -- [ TASKS ] ---------------------------------------------------------
-.PHONY: help compile compile-test clean test lint test-watch
+show:
+	@echo $$MM_PACKAGES
 
-node_modules: package.json
-	npm install
-
-compile:
-	./Scripts/compile.sh "$$PACKAGES" "$(babel)" "$$BABEL_OPTIONS"
-
-compile-assertion-comments:
-	PACKAGES=packages/babel-plugin-assertion-comments $(MAKE) compile
-
-compile-metamagical-comments:
-	PACKAGES=packages/babel-plugin-metamagical-comments $(MAKE) compile
-
-compile-interface:
-	PACKAGES=packages/interface $(MAKE) compile
-
-compile-mocha-bridge:
-	PACKAGES=packages/mocha-bridge $(MAKE) compile
-
-compile-markdown:
-	PACKAGES=packages/markdown $(MAKE) compile
-
-compile-sphinx:
-	PACKAGES=packages/sphinx $(MAKE) compile
-
-compile-mkdocs:
-	PACKAGES=packages/mkdocs $(MAKE) compile
-
-compile-static-tree:
-	PACKAGES=packages/static-tree $(MAKE) compile
-
-compile-repl:
-	PACKAGES=packages/repl $(MAKE) compile
-
-clean:
-	rm -r packages/**/lib
-
+.PHONY: lint
 lint:
-	$(eslint) .
+	./Scripts/run.sh lint "$$MM_PACKAGES"
+
+.PHONY: build
+build:
+	./Scripts/run.sh build "$$MM_PACKAGES"
+
+.PHONY: test
+test:
+	./Scripts/run.sh test "$$MM_PACKAGES"
+
+.PHONY: clean-test
+clean-test:
+	./Scripts/run.sh clean-test "$$MM_PACKAGES"
+
+.PHONY: clean
+clean:
+	./Scripts/run.sh clean "$$MM_PACKAGES"
+
+.PHONY: install
+install:
+	npm install
+	./Scripts/run.sh install "$$MM_PACKAGES"

@@ -21,12 +21,16 @@ test: build
 	$(babel) test/src --source-map inline --out-dir test/spec
 	$(mocha) --reporter spec --uid bdd test/spec
 
-publish:
+publish: clean-test
+	npm publish
+
+install:
+	npm install
+
+clean-test:
 	$(MAKE) clean
 	rm -rf node_modules
 	npm install
-	$(MAKE) build
 	$(MAKE) test
-	npm publish
 
-.PHONY: build clean lint test
+.PHONY: build clean lint test clean-test install publish

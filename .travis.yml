@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - "4"
+  - "5"
+  - "6"
+env:
+  - MM_EXPERIMENTAL_PACKAGES=false
+  - MM_EXPERIMENTAL_PACKAGES=true
+
+matrix:
+  allow_failures:
+    env:
+      - MM_EXPERIMENTAL_PACKAGES=true
+
+install: make install
+script: make test

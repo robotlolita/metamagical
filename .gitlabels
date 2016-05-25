@@ -14,6 +14,7 @@
 - (test) Introduces new tests or improves existing ones.
 - (perf performance) Introduces performance optimisations.
 - (re refactor) Changes structure, but doesn't introduce new features nor fixes bugs.
+- (build) Changes to the build scripts
 
 # --[ Qualifiers ]-----------------------------------------------------
 # Changes may be qualified

@@ -17,7 +17,7 @@ clean:
 lint:
 	$(eslint) .
 
-test:
+test: build
 	exit 0
 
 publish: clean-test

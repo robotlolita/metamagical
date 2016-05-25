@@ -36,9 +36,6 @@ endif
 
 
 # -- [ TASKS ] ---------------------------------------------------------
-show:
-	@echo $$MM_PACKAGES
-
 .PHONY: lint
 lint:
 	./Scripts/run.sh lint "$$MM_PACKAGES"
@@ -49,6 +46,7 @@ build:
 
 .PHONY: test
 test:
+	$(MAKE) build
 	./Scripts/run.sh test "$$MM_PACKAGES"
 
 .PHONY: clean-test

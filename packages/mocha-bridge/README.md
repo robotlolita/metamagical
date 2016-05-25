@@ -19,6 +19,7 @@ function double(n) {
 }
 
 double[Symbol.for('@@meta:magical')] = {
+  name: 'double',
   examples: [_ => {
     var assert = require('assert');
     assert(double(10) === 20);
@@ -36,6 +37,9 @@ const defineTests = require('metamagical-mocha-bridge')(metamagical, describe, i
 defineTests(double);
 ```
 
+> **NOTE**  
+> metamagical-mocha-bridge only runs tests for **named** objects.
+
 If you use the [Babel assertion comments plugin](../babel-plugin-assertion-comments), you can write this instead:
 
 ```js
@@ -44,6 +48,7 @@ function double(n) {
 }
 
 double[Symbol.for('@@meta:magical')] = {
+  name: 'double',
   examples: [_ => {
     double(10); // ==> 20
     double(15); // ==> 30

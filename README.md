@@ -1,4 +1,4 @@
-# Meta:Magical [![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) ![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg?style=flat-square) ![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+# Meta:Magical [![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) [![Build Status](https://travis-ci.org/origamitower/metamagical.svg?branch=master)](https://travis-ci.org/origamitower/metamagical) ![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg?style=flat-square) ![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
 
 
 > **WARNING**  
@@ -12,10 +12,10 @@ This allows for some very interesting features. For example:
 
   - A REPL may use this data to provide auto-completion features, documentation,
     or even show related functionality.
-    
+
   - A tool may use example code attached to an object and run them as test cases
     automatically.
-    
+
   - A compiler may output annotated objects, and enable people to inspect these
     annotations in ways that aren't possible with static documentation generators
     due to the dynamic nature of JavaScript.
@@ -23,6 +23,14 @@ This allows for some very interesting features. For example:
 The current focus of development is to provide a robust framework for annotating
 live objects, and an interactive tool for exploring objects enriched with these
 annotations.
+
+
+## Supported platforms
+
+Meta:Magical relies on Symbols and WeakMaps, and thus only properly works
+in VMs that implement ECMAScript 2015/ES6. You may run parts of it in older
+VMs, using Babel and polyfills, but there are no guarantees that things will
+work properly.
 
 
 ## Repository Layout
@@ -36,28 +44,28 @@ directory, and experiments live in the `experimental/` directory.
   - [**Interface**](packages/interface) —
     The Meta:Magical interface provides the basis for annotating live objects,
     and querying this meta-data.
-    
+
   - [**REPL Browser**](packages/repl) —
     The REPL Browser allows exploring annotated objects from a regular Node
     REPL.
-    
+
   - [**Mocha Bridge**](packages/mocha-bridge) —
     The Mocha bridge allows automatically defining tests in the Mocha framework
     by recursively finding all examples attached to objects given a root object.
-    
+
   - [**Babel Plugin: Meta:Magical comments**](packages/babel-plugin-metamagical-comments) —
     The Meta:Magical comments plugin allows annotating objects by using documentation
     comments, in a very similar way to things like JavaDoc, JSDoc, etc. The plugin can
     infer static information and automatically extract examples from documentation, which
     can then be automatically tested.
-    
+
   - [**Babel Plugin: Assertion comments**](packages/babel-plugin-assertion-comments) —
     The assertion comments plugin isn't a Meta:Magical feature, but was created to allow
     examples to be defined in a more readable way. This plugin allows compiling trailing
     comments in the form of `2 + 2 // ==> 4` to an actual runtime assertion, and is a
     good fit for examples in documentation.
-    
-    
+
+
 ## How do I use this?
 
 > **NOTE**  
@@ -122,7 +130,7 @@ Would give you the following output:
 
 
 Stability: 1 - Experimental
-Platforms: 
+Platforms:
     • ECMAScript 2015
 
 The Meta:Magical interface allows one to query meta-data associated
@@ -137,24 +145,24 @@ without modifying the object.
     • allProperties()
       | Retrieves a categorised list of properties in the current
    context.
-   
+
     • properties()
       | Retrieves a categorised list of properties owned by the current
    context.
-   
+
 
 ### Auxiliary methods for querying metadata
 
     • getInheritedMeta(name)
       | Retrieves metadata defined in the closest parent for the interface's
    context.
-   
+
     • getOwnMeta(name)
       | Retrieves metadata defined directly on the current interface's context.
-   
+
     • getPropagatedMeta(name)
       | Retrieves metadata defined in the children of the interface's context.
-   
+
 ( ... )
 
 ------------------------------------------------------------------------
@@ -168,9 +176,9 @@ Licence: MIT
 Repository: git://github.com/origamitower/metamagical.git
 Web Site: https://github.com/origamitower/metamagical#readme
 
-Authors: 
+Authors:
     • Quildreen Motta <queen@robotlolita.me>
-Maintainers: 
+Maintainers:
     • Quildreen Motta <queen@robotlolita.me> (http://robotlolita.me/)
 ```
 
@@ -184,7 +192,7 @@ can look at the browser itself to know what you can do with it, just
 ### I'd like to document someone *else*'s objects
 
 Attaching meta-data to other people's objects can be done safely with the
-Meta:Magical interface, which keeps an internal WeakMap associating 
+Meta:Magical interface, which keeps an internal WeakMap associating
 objects with metadata. This also accounts for the cases where the object
 has been frozen, and thus can't be modified.
 
@@ -279,11 +287,12 @@ it takes too much effort to use?), feel free to open a new issue in the
 Pull Requests are welcome. By submitting a Pull Request you agree with releasing
 your code under the MIT licence.
 
+You can join the [Gitter Channel](https://gitter.im/origamitower/discussion) for quick support.
 You can contact the author over [email](mailto:queen@robotlolita.me), or
 [Twitter](https://twitter.com/robotlolita).
 
 Note that all interactions in this project are subject to Origami Tower's
-[Code of Conduct](https://github.com/origamitower/conventions/blob/master/code-of-conduct.md).
+[Code of Conduct](https://github.com/origamitower/metamagical/blob/master/CODE_OF_CONDUCT.md).
 
 
 ## Licence

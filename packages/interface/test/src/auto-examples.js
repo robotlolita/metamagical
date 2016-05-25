@@ -10,7 +10,7 @@
 // This module runs all of the example-based tests defined in the
 // documentation for this module.
 const metamagical = require('../../');
-const defineTests = require('metamagical-mocha-bridge')(metamagical, describe, it);
+const defineTests = require('../../../mocha-bridge')(metamagical, describe, it);
 
 defineTests(metamagical);
 

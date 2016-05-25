@@ -1,7 +1,9 @@
 # Meta:Magical Mocha Bridge
 
-[![NPM version](https://img.shields.io/npm/v/metamagical-example-testing.svg?style=flat-square)](https://npmjs.org/package/metamagical-example-testing)
-![Licence](https://img.shields.io/npm/l/metamagical-example-testing.svg?style=flat-square&label=licence)
+[![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) 
+[![Build status](https://img.shields.io/travis/origamitower/metamagical/master.svg?style=flat-square)](https://travis-ci.org/origamitower/metamagical) 
+[![NPM version](https://img.shields.io/npm/v/metamagical-mocha-bridge.svg?style=flat-square)](https://npmjs.org/package/metamagical-mocha-bridge)
+![Licence](https://img.shields.io/npm/l/metamagical-mocha-bridge.svg?style=flat-square&label=licence)
 ![Stability: Stable](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
 
 This package allows defining Mocha test cases from Meta:Magical examples.
@@ -18,8 +20,9 @@ function double(n) {
 
 double[Symbol.for('@@meta:magical')] = {
   examples: [_ => {
-    double(10)  // ==> 20
-    double(15)  // ==> 30
+    var assert = require('assert');
+    assert(double(10) === 20);
+    assert(double(15) === 30);
   }]
 }
 ```
@@ -32,6 +35,22 @@ const defineTests = require('metamagical-mocha-bridge')(metamagical, describe, i
 
 defineTests(double);
 ```
+
+If you use the [Babel assertion comments plugin](../babel-plugin-assertion-comments), you can write this instead:
+
+```js
+function double(n) {
+  return n + n;
+}
+
+double[Symbol.for('@@meta:magical')] = {
+  examples: [_ => {
+    double(10); // ==> 20
+    double(15); // ==> 30
+  }]
+}
+```
+
 
 
 ## Installing
@@ -50,7 +69,6 @@ $ npm install metamagical-mocha-bridge
 [Node.js]: nodejs.org
 
 
-
 ## Support
 
 If you think you've found a bug in the project, or want to voice your
@@ -61,9 +79,8 @@ it takes too much effort to use?), feel free to open a new issue in the
 Pull Requests are welcome. By submitting a Pull Request you agree with releasing
 your code under the MIT licence.
 
-You can join the [Gitter Channel](https://gitter.im/origamitower/discussion) for
-quick support. You may also contact the author directly through
-[email](mailto:queen@robotlolita.me), or
+You can join the [Gitter Channel](https://gitter.im/origamitower/discussion) for quick support.
+You can contact the author over [email](mailto:queen@robotlolita.me), or
 [Twitter](https://twitter.com/robotlolita).
 
 Note that all interactions in this project are subject to Origami Tower's

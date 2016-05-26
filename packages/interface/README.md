@@ -46,7 +46,7 @@ Then launch a Node REPL to browse the project:
 ```js
 node> var Interface = require('./packages/interface')
 node> var browser = require('./packages/repl')(Interface)
-node> browser.browse(Interface).summary()
+node> browser.for(Interface).summary()
 
 # Interface
 ===========

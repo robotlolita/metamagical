@@ -2,6 +2,7 @@
   "presets": ["es2015"],
   "plugins": [
     "transform-metamagical-comments",
+    "transform-assertion-comments",
     "transform-function-bind",
     "transform-object-rest-spread",
     "transform-async-to-generator"

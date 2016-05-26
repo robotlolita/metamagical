@@ -1,8 +1,11 @@
 # Meta:Magical Babel Assertion Comments Plugin
 
-[![NPM version](https://img.shields.io/npm/v/babel-plugin-transform-metamagical-comments.svg?style=flat-square)](https://npmjs.org/package/babel-plugin-transform-metamagical-comments)
-![Licence](https://img.shields.io/npm/l/babel-plugin-transform-metamagical-comments.svg?style=flat-square&label=licence)
-![Stability: Stable](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+[![Chat on Gitter](https://img.shields.io/gitter/room/origamitower/discussion.svg?style=flat-square)](https://gitter.im/origamitower/discussion) 
+[![Build status](https://img.shields.io/travis/origamitower/metamagical/master.svg?style=flat-square)](https://travis-ci.org/origamitower/metamagical) 
+[![NPM version](https://img.shields.io/npm/v/babel-plugin-transform-assertion-comments.svg?style=flat-square)](https://npmjs.org/package/babel-plugin-transform-assertion-comments) 
+![Licence](https://img.shields.io/npm/l/babel-plugin-transform-assertion-comments.svg?style=flat-square&label=licence) 
+![Stability: Experimental](https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square)
+
 
 This plugin allows having assertions in your comments.
 
@@ -10,14 +13,66 @@ This plugin allows having assertions in your comments.
 ## Example
 
 ```js
-1 + 2; // ==> 3
+1 + 2;              // ==> 3
+[1].concat([2])     // ==> [1, ..._]
+{ x: 1, y: 2 }      // ==> { x: 1, y: 2 }
 ```
 
-Compiles down to:
+
+## Supported assertions
+
+Assertions are defined in the form:
 
 ```js
-require('assert')(1 + 2, 3, "1 + 2 ==> 3");
+Actual Value                  Expected Value
+
+<ExpressionStatement>; // ==> <Expression | Array | Record>
 ```
+
+Arrays are expressed using the Array literal. And may include
+`..._` at the end to indicate that the array may contain any
+other elements after that point. Arrays are otherwise compared
+structurally, so if the same elements, in the same position,
+happen in both sides, they're considered equal:
+
+```js
+OK:
+[1, 2, 3];     // ==> [1, 2, 3]
+[1, 2, ..._];  // ==> [1, 2]
+[1, 2, ..._];  // ==> [1, 2, 3, 4]
+
+NOT OK:
+[1, 2, 3];  // ==> [3, 2, 1] 
+[1, 2, 3];  // ==> [1, 3, 2]
+```
+
+Records are expressed using the Object literal. Records are
+compared structurally, and the two values are considered
+equal if they have the same keys, with the same values.
+
+If a record includes the `..._` spread element, then
+the two objects are equal if the actual value has the
+same keys (own or inherited) and values as the expected value:
+
+```js
+OK:
+{ __proto__: { a: 1 }, b: 2 }  // ==> { a: 1, b: 2, ..._ }
+{ __proto__: { a: 1 }, b: 2 }  // ==> { a: 1, ..._ }
+{ __proto__: { a: 1 }, b: 2 }  // ==> { b: 2, ..._ }
+
+
+NOT OK:
+{ __proto__: { a: 1 }, b: 2 }  // ==> { a: 1, b: 1, ..._ }
+{ __proto__: { a: 1 }, b: 2 }  // ==> { a: 1, c: 2, ..._ }
+```
+
+Otherwise the two values are equal if they have the same
+own enumerable keys, with the same values.
+
+If the two values provide an `.equals` method, then the assertion
+plugin will just use that method to compare them.
+
+Otherwise the values are compared with `===`.
 
 
 ## Installing
@@ -102,11 +157,12 @@ it takes too much effort to use?), feel free to open a new issue in the
 Pull Requests are welcome. By submitting a Pull Request you agree with releasing
 your code under the MIT licence.
 
+You can join the [Gitter Channel](https://gitter.im/origamitower/discussion) for quick support.
 You can contact the author over [email](mailto:queen@robotlolita.me), or
 [Twitter](https://twitter.com/robotlolita).
 
 Note that all interactions in this project are subject to Origami Tower's
-[Code of Conduct](https://github.com/origamitower/conventions/blob/master/code-of-conduct.md).
+[Code of Conduct](https://github.com/origamitower/metamagical/blob/master/CODE_OF_CONDUCT.md).
 
 
 ## Licence

@@ -38,12 +38,13 @@ happen in both sides, they're considered equal:
 ```js
 OK:
 [1, 2, 3];     // ==> [1, 2, 3]
-[1, 2, ..._];  // ==> [1, 2]
-[1, 2, ..._];  // ==> [1, 2, 3, 4]
+[1, 2];        // ==> [1, 2, ..._]
+[1, 2, 3, 4];  // ==> [1, 2, ..._]
 
 NOT OK:
 [1, 2, 3];  // ==> [3, 2, 1] 
 [1, 2, 3];  // ==> [1, 3, 2]
+[1];        // ==> [1, 2, ..._]
 ```
 
 Records are expressed using the Object literal. Records are

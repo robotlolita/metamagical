@@ -293,15 +293,15 @@ function categoriseProperties(meta, entries) {
  * refined to look at another object, which can be done by inheriting
  * from it explicitly or just using the `.for()` method::
  *
- *     Interface.getByName('name');
+ *     Interface.getByName('name').get();
  *     // ==> 'Interface'
  *
  *     const getInterface = Interface.for(Interface.getByName);
- *     getInterface.getByName('name');
+ *     getInterface.getByName('name').get();
  *     // ==> 'getByName'
  *
  *     const myInterface = getInterface.for(Interface);
- *     myInterface.getByName('name');
+ *     myInterface.getByName('name').get();
  *     // ==> 'Interface'
  *
  * At any point you can use the `object` method to retrieve the
@@ -350,7 +350,7 @@ function categoriseProperties(meta, entries) {
  *     };
  *
  *     Interface.for(root.child).getInheritedMeta('licence').getOrElse(null);
- *     // ==> 'CCO'
+ *     // ==> 'CC0'
  *
  *
  * ### Propagation
@@ -435,14 +435,14 @@ function categoriseProperties(meta, entries) {
  *     const x = {};
  *     const xMeta = Interface.for(x);
  *     xMeta.set('name', 'x');
- *     xMeta.getByName('name'); // ==> 'x'
+ *     xMeta.getByName('name').getOrElse(null); // ==> 'x'
  *
  * Multiple metadata may be provided as an object through the
  * `.update(meta)` method. All own enumerable key/value pairs provided
  * will replace the existing metadata on the object::
  *
  *     xMeta.update({ name: 'X' });
- *     xMeta.getByName('name'); // ==> 'X'
+ *     xMeta.getByName('name').getOrElse(null); // ==> 'X'
  *
  *
  * ## Known issues with Meta:Magical
@@ -486,7 +486,7 @@ function categoriseProperties(meta, entries) {
  *
  *     module.exports = function(metamagical) {
  *       return {
- *         foo() { return metamagical.get('name') }
+ *         foo() { return metamagical.getByName('name') }
  *       };
  *     }
  *
@@ -494,7 +494,7 @@ function categoriseProperties(meta, entries) {
  *
  *     const metamagical = require('metamagical-interface');
  *     module.exports = {
- *       foo() { return metamagical.get('name') }
+ *       foo() { return metamagical.getByName('name') }
  *     }
  *
  * ---
@@ -530,12 +530,13 @@ const Interface = Refinable.refine({
    *       object: x
    *     });
    *
-   *     meta.get('name'); // ==> 'x'
+   *     meta.getByName('name').getOrElse(null); // ==> 'x'
    *
    * A much more convenient way of changing the context is by using
    * the `.for(object)` method, however::
    *
-   *     Interface.for(x).get('name'); // ==> 'x'
+   *     Interface.for(x).getByName('name').getOrElse(null);
+   *     // ==> 'x'
    *
    * ---
    * category  : State and configuration
@@ -567,7 +568,7 @@ const Interface = Refinable.refine({
    *       }
    *     };
    *     const xMeta = Interface.for(x);
-   *     xMeta.get('name'); // ==> 'x'
+   *     xMeta.getByName('name').getOrElse(null); // ==> 'x'
    *
    * ---
    * category  : State and configuration
@@ -780,10 +781,10 @@ const Interface = Refinable.refine({
    *     const a     = Object.freeze({});
    *     const aMeta = Interface.for(a);
    *
-   *     aMeta.get('name').getOrElse('Anonymous');  // ==> 'Anonymous'
+   *     aMeta.getByName('name').getOrElse('Anonymous');  // ==> 'Anonymous'
    *
-   *     aMeta.set('name', 'a');   // ==> aMeta
-   *     aMeta.get('name').get();  // ==> 'a'
+   *     aMeta.set('name', 'a');         // ==> aMeta
+   *     aMeta.getByName('name').get();  // ==> 'a'
    *
    * This operation associates new metadata with the current interface's context.
    * Metadata is attached by using the internal `WeakMap`, and as such can be
@@ -824,11 +825,11 @@ const Interface = Refinable.refine({
    *     const a     = Object.freeze({});
    *     const aMeta = Interface.for(a);
    *
-   *     aMeta.get('type').getOrElse('Unknown'); // ==> 'Unknown'
+   *     aMeta.getByName('type').getOrElse('Unknown'); // ==> 'Unknown'
    *
    *     aMeta.update({ name: 'a', type: 'Object' }); // ==> aMeta
-   *     aMeta.get('name').get();  // ==> 'a'
-   *     aMeta.get('type').get();  // ==> 'Object'
+   *     aMeta.getByName('name').get();  // ==> 'a'
+   *     aMeta.getByName('type').get();  // ==> 'Object'
    *
    * This operation associates new metadata with the current interface's context.
    * Metadata is attached by using the internal `WeakMap`, and as such can be

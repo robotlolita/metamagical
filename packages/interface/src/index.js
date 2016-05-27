@@ -192,11 +192,21 @@ function compare(a, b) {
 }
 
 /*~
+ * Compares two categories.
+ */
+function compareCategories(a, b) {
+  return a === b                 ?   0
+  :      a === '(Uncategorised)' ?   1
+  :      b === '(Uncategorised)' ?  -1
+  :      /* otherwise */            compare(a, b);
+}
+
+/*~
  * Returns a list of categories for the given properties.
  */
 function categoriseProperties(meta, entries) {
   const byName     = (a, b) => compare(a.name, b.name);
-  const byCategory = (a, b) => compare(a.category, b.category);
+  const byCategory = (a, b) => compareCategories(a.category, b.category);
 
   const asCategoryObject = ([category, members]) => ({ category, members });
 

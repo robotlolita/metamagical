@@ -44,6 +44,8 @@ inheritance and propagation that were already used by other projects.
 
   - Fixed incorrect and outdated example code.
 
+  - Sorts `(Uncategorised)` last.
+
 
 
 

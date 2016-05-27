@@ -19,6 +19,7 @@ const Maybe            = require('data.maybe');
 const { assertObject } = require('./assertions');
 const fields           = require('./fields');
 const Stability        = require('./stability');
+const Primitive        = require('./primitives');
 
 // --[ Aliases ]-------------------------------------------------------
 const symbols      = Object.getOwnPropertySymbols;
@@ -593,11 +594,11 @@ const Interface = Refinable.refine({
    *   (proto is Interface).(Object 'a) => Interface <: proto
    */
   for(value) {
-    assertObject(value);
-
-    return this.refine({
-      object: value
-    });
+    if (isObject(value)) {
+      return this.refine({ object: value });
+    } else {
+      return this.refine({ object: Primitive.from(value) });
+    }
   },
 
 

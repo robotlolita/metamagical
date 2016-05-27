@@ -32,6 +32,11 @@ inheritance and propagation that were already used by other projects.
 
   - Added a specific Makefile for Interface.
 
+  - A set of primitive wrappers that allows Interface to deal with primitive
+    objects in a limited way. This simplifies the work tooling has to do to
+    explore an object without having things explode when encountering a
+    primitive.
+
 #### Changed
 
   - `copyright`, `licence`, and `platforms` are not propagated anymore.

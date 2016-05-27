@@ -18,7 +18,7 @@ the Interface module, by consolidating things such as metadata
 inheritance and propagation that were already used by other projects.
 
 
-### [3.3.0]
+### [3.3.0] - 2016-05-27
 
 #### Added
 

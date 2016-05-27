@@ -9,7 +9,7 @@ versions.
 
 ## 0.x
 
-### [0.2.3]
+### [0.2.3] - 2016-05-26
 
 The first stable release of the Assertion comments plugin supports
 assertions for structural equality using Setoids, partial Arrays

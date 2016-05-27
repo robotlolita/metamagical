@@ -42,6 +42,15 @@ function clamp(n, min, max) {
 }
 
 // --[ The renderer ]--------------------------------------------------
+
+/*~
+ * A display for Terminal interfaces.
+ *
+ * ---
+ * isModule  : true
+ * stability : experimental
+ * category  : Displays
+ */
 const TerminalDisplay = Refinable.refine({
   formatting: {
     title: [

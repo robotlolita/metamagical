@@ -12,6 +12,15 @@ const { data } = require('folktale/core/adt');
 
 
 // --[ ADT Definition ]------------------------------------------------
+
+/*~
+ * The AST used by displays to present information.
+ *
+ * ---
+ * isModule  : true
+ * stability : experimental
+ * category  : Representing output
+ */
 const AST = data('metamagical-browser:ADT', {
 
   // ---[ Base nodes ]-------------------------------------------------

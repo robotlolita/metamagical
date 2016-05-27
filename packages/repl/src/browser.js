@@ -65,41 +65,204 @@ function deprecated({ since, reason }) {
 
 
 // --[ The Browser ]---------------------------------------------------
+/*~
+ * The Meta:Magical browser allows inspecting annotated objects and
+ * learning how to use them.
+ *
+ * The Browser is parameterised on an Interface, and a Display. The
+ * Interface tells the Browser how to access metadata, whereas the
+ * Display tells the Browser how to show that metadata.
+ *
+ * See the `State & Configuration` section for more details.
+ *
+ * ---
+ * isModule  : true
+ * stability : experimental
+ * category  : Browsing Metadata
+ */
 const Browser = Refinable.refine({
 
   // ---[ State & Configuration ]--------------------------------------
+  /*~
+   * The metadata that should be displayed by this browser.
+   *
+   * This is an instance of `metamagical-interface`'s Interface, pointing
+   * to the object that this browser should display. For example, in order
+   * to see the summary of this Browser, one could refine it in the
+   * following way:
+   *
+   *     const Interface = require('metamagical-interface');
+   *     Browser.refine({ metadata: Interface.for(Browser) }).summary()
+   *
+   * It's better to use the `.for(Interface)` method of the Browser to
+   * refine it than refine it directly, however:
+   *
+   *     Browser.for(Interface.for(Browser)).summary()
+   *
+   * ---
+   * isRequired : true
+   * category   : State & Configuration
+   * stability  : experimental
+   * type: |
+   *   Interface
+   */
   get metadata() {
     throw new Error('Unimplemented.');
   },
 
+  /*~
+   * How the metadata should be presented to the user.
+   *
+   * By default this Browser uses a Terminal display, which shows the
+   * data with some formatting using terminal escape characters.
+   *
+   * Any other display may be provided, however, and this can be used
+   * for generating static documentation, for example, by providing a
+   * display that computes HTML or Markdown, instead of outputing it
+   * to the screen.
+   *
+   * A display is a type that has a single method, `show(tree)`, which
+   * takes a tree from a Browser AST, and returns the result of showing
+   * that tree. In essence, Displays must fulfil the following interface:
+   *
+   *     type Display = {
+   *       show : (BrowserAST) => Any
+   *     }
+   *
+   * Since the Terminal display just outputs it on the terminal, it just
+   * returns undefined. The Browser itself does nothing with the result,
+   * it only returns it. So your Display could also return richer data
+   * than a String, if it makes post-processing easier.
+   *
+   * In order to provide a Display to the browser, it has to be refined:
+   *
+   *     const HTMLBrowser = Browser.refine({ display: HTMLDisplay });
+   *
+   * ---
+   * category  : State & Configuration
+   * stability : experimental
+   * type: |
+   *   { show : (BrowserAST) => Any }
+   */
   get display() {
     return TerminalDisplay;
   },
 
 
   // ---[ Navigating in the browser ]----------------------------------
+  /*~
+   * Changes the Interface for metadata this browser is showing.
+   *
+   * This should be an instane of `metamagical-interface`'s Interface
+   * pointing to the object this browser should display. See `metadata`
+   * for more information.
+   *
+   * Example:
+   *
+   *     const Interface = require('metamagical-interface');
+   *     const browserBrowser = Browser.for(Interface.for(Browser));
+   *
+   * ---
+   * category  : Navigating in the browser
+   * stability : experimental
+   * type: |
+   *   Browser.(Interface) => Browser
+   */
   for(meta) {
     return this.refine({ metadata: meta });
   },
 
+  /*~
+   * Browses the object at the given property of the current object.
+   *
+   * Example:
+   *
+   *     const forPropertyBrowser = Browser.forProperty("forProperty");
+   *
+   * ---
+   * category  : Navigating in the browser
+   * stability : experimental
+   *
+   * throws:
+   *   Error: when the property doesn't exist in the object.
+   *
+   * type: |
+   *   Browser.(String) => Browser :: (throws Error)
+   */
   forProperty(name) {
     return this.metadata.property(name).map(x => this.for(x))
                .orElse(_ => { throw new Error(`No property for ${name}`) })
                .get();
   },
 
+  /*~
+   * Browses the getter with the given name in the current object.
+   *
+   * Example:
+   *
+   *     const newBrowser = Browser.forGetter("metadata");
+   *
+   * ---
+   * category  : Navigating in the browser
+   * stability : experimental
+   *
+   * throws:
+   *   Error: when the getter doesn't exist in the object.
+   *
+   * type: |
+   *   Browser.(String) => Browser :: (throws Error)
+   */
   forGetter(name) {
     return this.metadata.getter(name).map(x => this.for(x))
                .orElse(_ => { throw new Error(`No getter for ${name}`) })
                .get();
   },
 
+  /*~
+   * Browses the setter with the given name in the current object.
+   *
+   * Example:
+   *
+   *     let foo = {
+   *       _x: 0,
+   *       set x(value) { this._x = value }
+   *     };
+   *     const newBrowser = Browser.for(Interface.for(foo))
+   *                               .forSetter("x");
+   *
+   * ---
+   * category  : Navigating in the browser
+   * stability : experimental
+   *
+   * throws:
+   *   Error: when the setter doesn't exist in the object.
+   *
+   * type: |
+   *   Browser.(String) => Browser :: (throws Error)
+   */
   forSetter(name) {
     return this.metadata.setter(name).map(x => this.for(x))
                .orElse(_ => { throw new Error(`No setter for ${name}`) })
                .get();
   },
 
+  /*~
+   * Browses the prototype of the current object.
+   *
+   * Example:
+   *
+   *     const newBrowser = Browser.forPrototype();
+   *
+   * ---
+   * category  : Navigating in the browser
+   * stability : experimental
+   *
+   * throws:
+   *   Error: when the object doesn't have a `[[Prototype]]`
+   *
+   * type: |
+   *   Browser.() => Browser :: (throws Error)
+   */
   forPrototype() {
     return this.metadata.prototype().map(x => this.for(x))
                .orElse(_ => { throw new Error('No prototype') })
@@ -248,6 +411,15 @@ const Browser = Refinable.refine({
 
   // ---[ Inspecting metadata ]----------------------------------------
 
+  /*~
+   * Shows the full documentation of the current object.
+   *
+   * ---
+   * category  : Inspecting metadata
+   * stability : experimental
+   * type: |
+   *   Browser.() => Any
+   */
   documentation() {
     return this.display.show(
       this._section(
@@ -259,6 +431,15 @@ const Browser = Refinable.refine({
     );
   },
 
+  /*~
+   * Shows the source code of the current object.
+   *
+   * ---
+   * category  : Inspecting metadata
+   * stability : experimental
+   * type: |
+   *   Browser.() => Any
+   */
   source() {
     return this.getMetadata('source').map(source =>
       this.display.show(
@@ -281,6 +462,15 @@ const Browser = Refinable.refine({
     ).getOrElse(undefined);
   },
 
+  /*~
+   * Shows the stability of the current object.
+   *
+   * ---
+   * category  : Inspecting metadata
+   * stability : experimental
+   * type: |
+   *   Browser.() => Any
+   */
   stability() {
     return this.getMetadata('stability').map(id => {
       const stability = this.metadata.Stability.fromIdentifier(id);
@@ -299,6 +489,16 @@ const Browser = Refinable.refine({
     }).getOrElse(undefined);
   },
 
+  /*~
+   * Shows a summary of the current object, with signature, synopsis, and
+   * properties.
+   *
+   * ---
+   * category  : Inspecting metadata
+   * stability : experimental
+   * type: |
+   *   Browser.() => Any
+   */
   summary() {
     return this.display.show(
       this._section(

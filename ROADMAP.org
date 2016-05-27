@@ -1,0 +1,16 @@
+* Interface
+** TODO Track overriden methods
+** TODO Track related methods (see also, etc)
+** TODO Interactive tutorials
+** TODO Type definitions and querying
+** TODO Use a superset of Markdown (currently too limited)
+* Assertions
+** TODO Support [1, ..._, 2]
+* Meta:Magical Doc Comments
+** TODO Infer metadata from AUTHORS/CONTRIBUTORS file
+** TODO Parse short repository URLs from package.json
+** TODO Parse author metadata
+* New applications
+** TODO An Electron-based Browser app
+* New libraries
+** TODO Common annotations as packages (for built-ins, Node, etc)

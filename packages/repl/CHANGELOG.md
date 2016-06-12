@@ -8,6 +8,17 @@ this file. Changes are ordered from most recent to oldest versions.
 
 ## 0.x
 
+### [Unreleased]
+
+  - Made `summary` shorter, moving inherited properties away.
+
+  - Added `.properties()` to list all properties in an object.
+
+  - `summary` now returns a longer partial doc, rather than a short synopsis.
+
+  - Show hierarchy in the summary.
+
+
 ### [0.2.0] - 2016-05-27
 
 The first release of the REPL browser allows one to browse annotated

@@ -18,6 +18,13 @@ the Interface module, by consolidating things such as metadata
 inheritance and propagation that were already used by other projects.
 
 
+### [Unreleased]
+
+  - Added `parents` and `hierarchy`.
+  
+  - Added minimal annotations for built-in hierarchy.
+
+
 ### [3.3.0] - 2016-05-27
 
 #### Added

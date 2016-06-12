@@ -997,7 +997,7 @@ const Interface = Refinable.refine({
   parents() {
     return this.prototype().cata({
       Nothing: _ => [],
-      Just:    a => [a.getByName('name').getOrElse(null), a.object].concat(a.parents())
+      Just:    a => [[a.getByName('name').getOrElse(null), a.object]].concat(a.parents())
     });
   },
 

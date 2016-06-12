@@ -288,11 +288,50 @@ const Browser = Refinable.refine({
     ]);
   },
 
+  _hierarchy() {
+    const hierarchy = this.metadata.hierarchy();
+    const parents   = this.metadata.parents();
+
+    if (parents.length > 0) {
+      return Sequence([
+        Label(Text('Hierarchy:')),
+        Text(' '),
+        Emphasis(Text(`(${parents.length} parent${parents.length > 0 ? 's' : ''})`)),
+        Text(' '),
+        Text(hierarchy.map(([name, _]) => name).join(' → '))
+      ]);
+    } else {
+      return Nil();
+    }
+  },
+
   _synopsis() {
     return this.getMetadata('documentation').map(doc => {
       const maybeParagraph = marked.lexer(doc)[0];
       if (maybeParagraph && maybeParagraph.type === 'paragraph') {
         return maybeParagraph.text;
+      } else {
+        return '(No synopsis)';
+      }
+    });
+  },
+
+  _partialDocs() {
+    return this.getMetadata('documentation').map(doc => {
+      const lines = doc.split(/\r\n|\n\r|\r|\n/).reduce(({ items, take }, line) => {
+        if (!take) {
+          return { items, take };
+        } else {
+          if (/^#+\s(?!example:?:?)/i.test(line)) {
+            return { items, take: false };
+          } else {
+            return { items: [...items, line], take };
+          }
+        }
+      }, { items: [], take: true }).items;
+
+      if (lines.length > 0) {
+        return lines.join('\n');
       } else {
         return '(No synopsis)';
       }
@@ -508,9 +547,10 @@ const Browser = Refinable.refine({
           Nil(),
           this.getMetadata('deprecated').map(deprecated).getOrElse(null),
           Nil(),
+          this._hierarchy(),
           this._executionMeta(),
           Nil(),
-          this._synopsis().map(Text).getOrElse(null),
+          this._partialDocs().map(Markdown).getOrElse(null),
           Nil(),
           Quote(Text('(run `.documentation()` for the full docs)')),
           Nil(),

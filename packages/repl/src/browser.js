@@ -516,16 +516,31 @@ const Browser = Refinable.refine({
           Nil(),
           Block(0, [
             Title(2, Text('Properties')),
-            this._renderProperties(3, this.metadata.allProperties())
+            this._renderProperties(3, this.metadata.properties())
           ]),
-          Nil(),
-          HorizontalLine(),
-          Nil(),
-          this._generalMetadata()
         ].filter(x => x !== null)))
       )
     );
   },
+
+
+  /*~
+   * Shows all properties that are accessible from the object.
+   * 
+   * ---
+   * category  : Inspecting metadata
+   * stability : experimental
+   * type: |
+   *   Browser.() => Any
+   */
+  properties() {
+    return this.display.show(
+      this._section(
+        Text(`Properties accessible from ${this.getSignature()}`),
+        this._renderProperties(2, this.metadata.allProperties())
+      )
+    );
+  }
 
 });
 

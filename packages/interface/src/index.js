@@ -1018,3 +1018,6 @@ const Interface = Refinable.refine({
 
 // --[ Exports ]-------------------------------------------------------
 module.exports = Interface;
+
+// --[ Attaches built-in annotations ]---------------------------------
+require('./annotations')(Interface);

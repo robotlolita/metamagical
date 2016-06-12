@@ -983,6 +983,35 @@ const Interface = Refinable.refine({
    */
   allProperties() {
     return categoriseProperties(this, allEntriesOf(this.object));
+  },
+
+  /*~
+   * Returns all of the parents of the current context.
+   * 
+   * ---
+   * category  : Additional reflective methods
+   * stability : experimental
+   * type: |
+   *   Interface.() => Array (String, Object)
+   */
+  parents() {
+    return this.prototype().cata({
+      Nothing: _ => [],
+      Just:    a => [a.getByName('name').getOrElse(null), a.object].concat(a.parents())
+    });
+  },
+
+  /*~
+   * Returns all named parents of the current context.
+   * 
+   * ---
+   * category  : Additional reflective methods
+   * stability : experimental
+   * type: |
+   *   Interface.() => Array (String, Object)
+   */
+  hierarchy() {
+    return this.parents().filter(([name, _]) => name != null);
   }
 });
 

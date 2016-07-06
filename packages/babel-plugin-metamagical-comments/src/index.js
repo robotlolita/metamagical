@@ -73,6 +73,10 @@ const readPackage = function() {
 }();
 
 function computeModuleId(name, root, file) {
+  if (!name) {
+    return null;
+  }
+
   let modulePath = path.relative(root, file);
   if (path.extname(modulePath) === '.js') {
     modulePath = modulePath.slice(0, -3);

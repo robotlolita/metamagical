@@ -263,7 +263,7 @@ module.exports = function({ types: t }) {
     );
   }
 
-  function intoExampleFunction(source, ast) {
+  function intoExampleFunction(source, ast, options) {
     const body = ast.program.body;
 
     return new Raw(withMeta({
@@ -274,13 +274,18 @@ module.exports = function({ types: t }) {
         false,  // generator
         false   // async
       ),
-      META: mergeMeta({ source })
+      META: mergeMeta(options, { source })
     }).expression);
   }
 
-  function parseExample({ name, source }) {
-    return name       ?  { name, call: intoExampleFunction(source, parse(source)), inferred: true }
-    :      /* else */    { name: '', call: intoExampleFunction(source, parse(source)), inferred: true };
+  function makeParser(options) {
+    return (source) => parse(source, options.babel || {});
+  }
+
+  function parseExample({ name, source }, options) {
+    let parse = makeParser(options || {})
+    return name       ?  { name, call: intoExampleFunction(source, parse(source), options), inferred: true }
+    :      /* else */    { name: '', call: intoExampleFunction(source, parse(source), options), inferred: true };
   }
 
   function findClosestParent(path, predicate) {
@@ -343,10 +348,10 @@ module.exports = function({ types: t }) {
     :      /* otherwise */                    {};
   }
 
-  function inferExamples(documentation) {
+  function inferExamples(documentation, options) {
     const examples = collectExamples(documentation || '');
 
-    return examples.length > 0?  { examples: examples.map(parseExample) }
+    return examples.length > 0?  { examples: examples.map(e => parseExample(e, options)) }
     :      /* otherwise */       { };
   }
 
@@ -503,12 +508,12 @@ module.exports = function({ types: t }) {
     :      /* otherwise */          raise(new TypeError(`Type of property not supported: ${value}`));
   }
 
-  function mergeMeta(...args) {
+  function mergeMeta(options, ...args) {
     let fullMeta = merge(...args);
 
     if (fullMeta.documentation) {
       const doc = fullMeta.documentation;
-      fullMeta = merge(fullMeta, inferExamples(doc));
+      fullMeta = merge(fullMeta, inferExamples(doc, options));
       fullMeta.documentation = doc.replace(/^::$/gm, '').replace(/::[ \t]*$/gm, ':');
     }
 
@@ -543,7 +548,7 @@ module.exports = function({ types: t }) {
     }
   }
 
-  function metaForProperty(path, objId, parentId, node) {
+  function metaForProperty(path, objId, parentId, node, opts) {
     const doc = getDocComment(node);
     if (doc) {
       const name  = inferName(node.key, node.computed);
@@ -556,7 +561,7 @@ module.exports = function({ types: t }) {
           KEY:    node.computed ? node.key
                   : /* else */    t.stringLiteral(node.key.name)
         }),
-        META:   mergeMeta(
+        META:   mergeMeta(opts,
           name,
           inferSource(path, value),
           inferSignature(value, toIdentifier(name)),
@@ -573,14 +578,14 @@ module.exports = function({ types: t }) {
 
   // --- PUBLIC TRANSFORM ----------------------------------------------
   const visitor = {
-    FunctionDeclaration(path, _state) {
+    FunctionDeclaration(path, { opts }) {
       const doc = getDocComment(path.node);
 
       if (doc) {
         includeHelper(path);
         path.insertAfter(withMeta({
           OBJECT: path.node.id,
-          META:   mergeMeta(
+          META:   mergeMeta(opts,
             { name: path.node.id.name },
             inferSource(path, path.node),
             inferSignature(path.node, path.node.id),
@@ -591,7 +596,7 @@ module.exports = function({ types: t }) {
       }
     },
 
-    VariableDeclaration(path, _state) {
+    VariableDeclaration(path, { opts }) {
       if (path.node.declarations.length === 1) {
         const declarator = path.node.declarations[0];
         const doc = getDocComment(path.node);
@@ -600,7 +605,7 @@ module.exports = function({ types: t }) {
           includeHelper(path);
           declarator.init = withMeta({
             OBJECT: declarator.init,
-            META:   mergeMeta(
+            META:   mergeMeta(opts,
               inferName(declarator.id),
               inferSource(path, declarator.init),
               inferSignature(declarator.init, declarator.id),
@@ -612,7 +617,7 @@ module.exports = function({ types: t }) {
       }
     },
 
-    ExpressionStatement(path, _state) {
+    ExpressionStatement(path, { opts }) {
       const expr = path.node.expression;
       if (t.isAssignmentExpression(expr)) {
         const doc = getDocComment(path.node);
@@ -625,7 +630,7 @@ module.exports = function({ types: t }) {
           includeHelper(path);
           expr.right = withMeta({
             OBJECT: expr.right,
-            META:   mergeMeta(
+            META:   mergeMeta(opts,
               name,
               inferSource(path, expr.right),
               inferSignature(expr.right, toIdentifier(name)),
@@ -639,13 +644,13 @@ module.exports = function({ types: t }) {
       }
     },
 
-    ObjectExpression(path, _state) {
+    ObjectExpression(path, { opts }) {
       const { node, scope, parent } = path;
 
       if (anyPropertyHasDoc(node)) {
         const id      = scope.generateUidIdentifierBasedOnNode(parent);
         const binding = maybeFindBindingFrom(path);
-        const meta    = node.properties.map(x => metaForProperty(path, id, binding, x))
+        const meta    = node.properties.map(x => metaForProperty(path, id, binding, x, opts))
                                        .filter(Boolean);
 
         includeHelper(path);

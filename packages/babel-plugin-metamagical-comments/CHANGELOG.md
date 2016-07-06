@@ -9,6 +9,34 @@ versions.
 
 ## 0.x
 
+### [Unreleased]
+
+
+#### New features
+
+  - [Allow users to configure Babylon's parsing of examples](https://github.com/origamitower/metamagical/commit/2ccf1f8b7bdd26d722625bef16599c63c5fd3362)
+
+    Babel doesn't expose the configured Babylon version to plugins, so this
+    is a compromise to allow different syntactical expectations to be used
+    in examples
+
+
+#### Fixes
+
+  - [Don't compute module IDs if the packages don't have a name](https://github.com/origamitower/metamagical/commit/1fbab291b43c6affa9c51d2fc6cac7bb3d52bc85) ([#23](https://github.com/origamitower/metamagical/issues/23))
+
+    If the `package.json` file doesn't have a `name`, we give up inferring the
+    module ID. This way modules outside of packages always have to provide 
+    their correct module IDs explicitly.
+
+  - [Ensure ASI doesn't apply between examples.](https://github.com/origamitower/metamagical/commit/6cb2a46065e0c647821f6bb59e69bd28404679c3)
+
+    Tracking these rules is hard for these cases, and failures are hard to
+    understand. We still get things merged between example sections, but
+    statements can't continue between one example section and the other.
+
+
+
 ### [0.11.1] - 2016-05-25
 
 The first stable release of the plugin, features:

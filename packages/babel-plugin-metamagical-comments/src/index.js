@@ -223,7 +223,7 @@ function collectExamples(documentation) {
   } else {
     return [...xs, {
       name: name,
-      source: x.join('\n\n')
+      source: x.join('\n;\n')
     }];
   }
 }

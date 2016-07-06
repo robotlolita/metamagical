@@ -8,7 +8,6 @@
 ** TODO Support [1, ..._, 2]
 ** TODO Support `throws`
 * Meta:Magical Doc Comments
-** TODO Support this-binding syntax in examples
 ** TODO Infer metadata from AUTHORS/CONTRIBUTORS file
 ** TODO Parse short repository URLs from package.json
 ** TODO Parse author metadata

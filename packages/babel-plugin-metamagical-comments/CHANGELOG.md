@@ -9,7 +9,7 @@ versions.
 
 ## 0.x
 
-### [Unreleased]
+### [0.12.0] - 2016-07-09
 
 
 #### New features

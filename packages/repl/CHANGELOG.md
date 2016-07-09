@@ -8,7 +8,7 @@ this file. Changes are ordered from most recent to oldest versions.
 
 ## 0.x
 
-### [Unreleased]
+### [0.3.0] - 2016-07-08
 
   - Made `summary` shorter, moving inherited properties away.
 

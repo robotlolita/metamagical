@@ -1,6 +1,6 @@
 {
   "name": "metamagical-repl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A REPL browser for Meta:Magical.",
   "main": "./lib/index.js",
   "repository": {

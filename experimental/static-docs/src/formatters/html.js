@@ -11,6 +11,7 @@
 const marked = require('marked');
 const _      = require('hyperscript');
 const path   = require('path');
+const fs     = require('fs');
 
 
 // --[ Helpers ]-------------------------------------------------------
@@ -21,6 +22,8 @@ const filename = (entity) => `${entity.path.join('.')}.html`;
 const link = (from, to) => filename(to);
 
 const entries = (object) => Object.keys(object).map(key => [key, object[key]]);
+
+const read = (filename) => fs.readFileSync(filename);
 
 const compact = (object) => {
   let result = Object.create(null);
@@ -197,9 +200,12 @@ const render = (entity, references, options) => {
 
 const wrapPage = (title, content, options) => {
   const titleElement = _('title', title);
+  const docTitle = _('div.doc-title',
+    _('a', { href: options.rootPage }, options.documentationTitle)
+  );
   const cssElement = _('link', {
     rel:  'stylesheet',
-    href: options.cssPath || '../style.css'
+    href: 'style.css'
   });
 
   return `
@@ -207,10 +213,13 @@ const wrapPage = (title, content, options) => {
 <html>
   <head>
     ${titleElement.outerHTML}
-    <link rel="stylesheet" href="../prism.css">
+    <link rel="stylesheet" href="prism.css">
     ${cssElement.outerHTML}
   </head>
   <body>
+    <div id="header">
+      ${docTitle.outerHTML}
+    </div>
     ${content.outerHTML}
     <script>
 void function() {
@@ -220,7 +229,7 @@ void function() {
   }
 }()
     </script>
-    <script src="../prism.js"></script>
+    <script src="prism.js"></script>
   </body>
 </html>`;
 };
@@ -228,10 +237,26 @@ void function() {
 
 const toHTML = (entities, options) => {
   const references = new Map(entities.map(x => [x.id, x]));
+  const resources = path.join(__dirname, '../../resources/html');
+  const css = read(options.cssPath || path.join(resources, 'default-theme.css'));
+
   return entities.map(entity => ({
     filename: filename(entity),
     content:  wrapPage(entity.name, render(entity, references, options), options)
-  }));
+  })).concat([
+    {
+      filename: 'style.css',
+      content:  css
+    },
+    {
+      filename: 'prism.css',
+      content: read(path.join(resources, 'static/prism.css'))
+    },
+    {
+      filename: 'prism.js',
+      content: read(path.join(resources, 'static/prism.js'))
+    }
+  ]);
 };
 
 // --[ Exports ]-------------------------------------------------------

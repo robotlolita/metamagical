@@ -2,12 +2,11 @@ bin    := ../../node_modules/.bin
 babel  := $(bin)/babel
 lint   := $(bin)/eslint
 mocha  := $(bin)/mocha
-stylus := $(bin)/stylus
 
 .DEFAULT_GOAL: build
 
 resources:
-	$(stylus) -I node_modules/nib/lib -I node_modules/jumperskirt/stylus -w -o resources/html/ resources/html/
+	./node_modules/.bin/stylus -I node_modules/nib/lib -I node_modules/jumperskirt/stylus -o resources/html/ resources/html/
 
 build: resources
 	@echo "-- Compiling metamagical-static-tree"

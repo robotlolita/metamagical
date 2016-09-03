@@ -4,3 +4,4 @@ node_modules/
 /packages/**/test/spec/
 /experimental/**/lib/
 /experimental/**/test/spec/
+/experimental/static-docs/resources/html/*.css

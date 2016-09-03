@@ -40,3 +40,4 @@
   - (mkdocs) The mkdocs generator
   - (sphinx) The Sphinx generator
   - (tree) The static-tree library
+  - (static) The static-docs library

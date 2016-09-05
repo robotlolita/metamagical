@@ -9,6 +9,14 @@ versions.
 
 ## 0.x
 
+### [0.3.0] - 2016-09-05
+
+#### New Features
+
+  - Support `$ASSERT(actual == expected)` and `$ASSERT(expr)` forms.
+    These are better for using in tests and stuff.
+ 
+
 ### [0.2.3] - 2016-05-26
 
 The first stable release of the Assertion comments plugin supports

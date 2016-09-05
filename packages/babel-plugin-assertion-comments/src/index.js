@@ -233,6 +233,37 @@ module.exports = function({ types: t }) {
             MESSAGE:  t.stringLiteral(`${generate(path.node.expression).code} ==> ${assertion.source}`)
           });
         }
+      },
+
+      CallExpression(path, state) {
+        const assertModule = state.opts.module || 'assert';
+        const callee = path.node.callee;
+
+        if (callee.type === "Identifier" && callee.name === "$ASSERT") {
+          if (!path.hub.file.scope.hasBinding('__metamagical_assert_equals')) {
+            path.hub.file.scope.push({
+              id: t.identifier('__metamagical_assert_equals'),
+              init: assertEqualsAST
+            });
+          }
+          
+          const expr = path.node.arguments[0];
+          if (expr.type === "BinaryExpression" && expr.operator === "==") {
+            path.replaceWith(buildAssertion({
+              MODULE:   t.stringLiteral(assertModule),
+              ACTUAL:   expr.left,
+              EXPECTED: expr.right,
+              MESSAGE:  t.stringLiteral(`${generate(expr.left).code} ==> ${generate(expr.right).code}`)
+            }));
+          } else {
+            path.replaceWith(buildAssertion({
+              MODULE:   t.stringLiteral(assertModule),
+              ACTUAL:   expr,
+              EXPECTED: t.booleanLiteral(true),
+              MESSAGE:  t.stringLiteral(`${generate(expr).code}`)
+            }));
+          }
+        }
       }
     }
   };

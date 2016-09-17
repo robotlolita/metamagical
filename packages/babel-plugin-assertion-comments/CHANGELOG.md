@@ -9,6 +9,18 @@ versions.
 
 ## 0.x
 
+### [0.3.1] - 2016-09-17
+
+#### Bug fixes
+
+  - The `$ASSERT(a == b)` form was not compiling special expectations. This
+    version allows records and arrays to be provided for either a or b.
+    
+#### Other
+
+  - Better error messages.
+  
+
 ### [0.3.0] - 2016-09-05
 
 #### New Features

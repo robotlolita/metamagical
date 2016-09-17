@@ -49,16 +49,16 @@ function assertEquals(assert, actual, expected, message) {
   function getSpecialArrayLength(array) {
     const rests = array.map((x, i) => [x, i]).filter(pair => pair[0] === rest);
     if (rests.length > 1 || (rests[0] && rests[0][1] !== array.length - 1)) {
-      assert.ok(false, message);
+      assert.ok(false, `${message}. Assertions only support a single trailing rest indication for arrays currently.`);
     }
     return (rests[0] || [null, array.length])[1];
   }
 
   function compareArrays(left, right) {
     const expectedLength = getSpecialArrayLength(right);
-    assert.ok(Array.isArray(left), message);
+    assert.ok(Array.isArray(left), `${message}. The LHS is not an array.`);
     if (left.length < expectedLength) {
-      assert.ok(false, message);
+      assert.ok(false, `${message}. The LHS does not have the minimum expected length (${left.length} < ${expectedLength})`);
     }
     for (let i = 0; i < expectedLength; ++i) {
       compare(left[i], right[i]);
@@ -69,11 +69,11 @@ function assertEquals(assert, actual, expected, message) {
     const isPartial = right[rest];
     assert.ok(Object(left) === left, message);
     if (!isPartial) {
-      assert.deepStrictEqual(keys(left).sort(), keys(right).sort(), message);
+      assert.deepStrictEqual(keys(left).sort(), keys(right).sort(), `${message}. The objects have different keys ([${keys(left).sort().join(', ')}] vs. [${keys(right).sort().join(', ')}])`);
     }
     Object.keys(right).forEach(key => {
       if (!(key in left)) {
-        assert.ok(false, message);
+        assert.ok(false, `${message}. The expected key ${key} is not present in the actual object.`);
       }
       compare(left[key], right[key]);
     });
@@ -81,10 +81,10 @@ function assertEquals(assert, actual, expected, message) {
 
 
   function compare(l, r) {
-    return check(isSetoid, l, r)  ?  assert.ok(l.equals(r), message)
+    return check(isSetoid, l, r)  ?  assert.ok(l.equals(r), `${message}. The LHS (${l}) setoid instance says the LHS and RHS (${r}) are not equal.`)
     :      Array.isArray(r)       ?  compareArrays(l, r)
     :      isRecord(r)            ?  compareRecord(l, r)
-    :      /* otherwise */           assert.deepStrictEqual(l, r, message);
+    :      /* otherwise */           assert.deepStrictEqual(l, r, `${message}. The LHS (${l}) and the RHS (${r}) are not structually equal.`);
   }
 
   compare(actual, expected);
@@ -154,30 +154,32 @@ module.exports = function({ types: t }) {
     return makeSymbol('@@meta:magical:assertion-type');
   }
 
-  function transformSpread(ast) {
-    traverse(ast, {
-      enter(path) {
-        switch (path.node.type) {
-          case 'SpreadElement':
-            if (path.node.argument.name === "_") {
-              path.replaceWith(makeRest());
-            }
-            break;
-
-          case 'ObjectExpression':
-            path.node.properties.push(
-              t.objectProperty(makeAssertionType(), t.stringLiteral('record'), true)
-            );
-            break;
-
-          case 'SpreadProperty':
-            if (path.node.argument.name === "_") {
-              path.replaceWith(t.objectProperty(makeRest(), t.booleanLiteral(true), true));
-            }
-            break;
+  const astTraversal = {
+    enter(path) {
+      switch (path.node.type) {
+      case 'SpreadElement':
+        if (path.node.argument.name === "_") {
+          path.replaceWith(makeRest());
         }
+        break;
+
+      case 'ObjectExpression':
+        path.node.properties.push(
+          t.objectProperty(makeAssertionType(), t.stringLiteral('record'), true)
+        );
+        break;
+
+      case 'SpreadProperty':
+        if (path.node.argument.name === "_") {
+          path.replaceWith(t.objectProperty(makeRest(), t.booleanLiteral(true), true));
+        }
+        break;
       }
-    });
+    }
+  };
+
+  function transformSpread(ast) {
+    traverse(ast, astTraversal);
     return ast;
   }
 
@@ -246,14 +248,18 @@ module.exports = function({ types: t }) {
               init: assertEqualsAST
             });
           }
-          
+
           const expr = path.node.arguments[0];
           if (expr.type === "BinaryExpression" && expr.operator === "==") {
+            const leftCode = generate(expr.left).code;
+            const rightCode = generate(expr.right).code;
+
+            path.traverse(astTraversal);
             path.replaceWith(buildAssertion({
               MODULE:   t.stringLiteral(assertModule),
               ACTUAL:   expr.left,
               EXPECTED: expr.right,
-              MESSAGE:  t.stringLiteral(`${generate(expr.left).code} ==> ${generate(expr.right).code}`)
+              MESSAGE:  t.stringLiteral(`${leftCode} ==> ${rightCode}`)
             }));
           } else {
             path.replaceWith(buildAssertion({

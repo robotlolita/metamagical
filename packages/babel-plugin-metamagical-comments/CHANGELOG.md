@@ -9,6 +9,21 @@ versions.
 
 ## 0.x
 
+
+### [0.13.0] - 2016-11-13
+
+#### New features
+
+  - [Support documentations for classes and class methods](https://github.com/origamitower/metamagical/commit/1c7e6758893c342ec049380e737bb4e5313a4696)
+
+  - [Infer `deprecated` stability from `deprecated` annotations](https://github.com/origamitower/metamagical/commit/d7de0f2dbd76be043610996969b794b41fbbb57d)
+
+
+#### Fixes
+
+  - [Allow string-valued keys in object literals to be documented](https://github.com/origamitower/metamagical/commit/ed0dfe9cc0f615d58c32746224bef93dd18e5020). Previously we only considered Identifier keys in object literals, so when you had a String key the compiler would crash. This fixes that.
+
+
 ### [0.12.0] - 2016-07-09
 
 

@@ -508,8 +508,18 @@ module.exports = function({ types: t }) {
     :      /* otherwise */          raise(new TypeError(`Type of property not supported: ${value}`));
   }
 
+  function inferDeprecated(meta) {
+    return meta.deprecated ?  merge(meta, { stability: 'deprecated' })
+    :      /* otherwise */    meta;
+  }
+
+  function inferMetadataFromProvidedMetadata(meta) {
+    return inferDeprecated(meta);
+  }
+
   function mergeMeta(options, ...args) {
     let fullMeta = merge(...args);
+    fullMeta = inferMetadataFromProvidedMetadata(fullMeta);
 
     if (fullMeta.documentation) {
       const doc = fullMeta.documentation;

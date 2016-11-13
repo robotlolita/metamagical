@@ -606,6 +606,46 @@ module.exports = function({ types: t }) {
       }
     },
 
+    ClassDeclaration(path, { opts }) {
+      const doc = getDocComment(path.node);
+
+      if (doc) {
+        includeHelper(path);
+        path.insertAfter(withMeta({
+          OBJECT: path.node.id,
+          META: mergeMeta(opts, 
+            { name: path.node.id.name },
+            inferSource(path, path.node),
+            inferFileAttributes(path),
+            parseDoc(doc)
+          )
+        }));
+      }
+
+      // Also handles method definitions
+      path.node.body.body.filter(x => x.type === 'ClassMethod').forEach(method => {
+        const doc = getDocComment(method);
+        if (doc) {
+          includeHelper(path);
+          path.insertAfter(withMeta({
+            OBJECT: t.memberExpression(
+              method.static ? path.node.id : t.memberExpression(path.node.id, t.identifier('prototype')), 
+              method.key, 
+              method.computed
+            ),
+            META: mergeMeta(opts,
+              inferName(method.key, method.computed),
+              inferSource(path, method),
+              inferFileAttributes(path),
+              parseDoc(doc)
+            )
+          }))
+        }
+      });
+    },
+
+
+
     VariableDeclaration(path, { opts }) {
       if (path.node.declarations.length === 1) {
         const declarator = path.node.declarations[0];

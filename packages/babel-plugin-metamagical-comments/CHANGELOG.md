@@ -9,6 +9,12 @@ versions.
 
 ## 0.x
 
+### [0.13.1] - 2016-11-13
+
+#### Fixes
+
+  - [Properly handles getters/setters in classes](https://github.com/origamitower/metamagical/commit/6dd61214cf016391fd3a906b72ee6939de0d6172). Previously getters were being executed when attaching the documentation to the object. Documentation was also attached to the wrong object.
+
 
 ### [0.13.0] - 2016-11-13
 

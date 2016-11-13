@@ -344,6 +344,7 @@ module.exports = function({ types: t }) {
 
   function inferName(id, computed) {
     return t.isIdentifier(id) && !computed ?  { name: id.name }
+    :      t.isStringLiteral(id)           ?  { name: id.value }
     :      t.isMemberExpression(id)        ?  inferName(id.property, id.computed)
     :      /* otherwise */                    {};
   }
@@ -568,8 +569,9 @@ module.exports = function({ types: t }) {
       return withMeta({
         OBJECT: accessorFor(node)({
           OBJECT: objId,
-          KEY:    node.computed ? node.key
-                  : /* else */    t.stringLiteral(node.key.name)
+          KEY:    node.computed                 ? node.key
+                  : t.isStringLiteral(node.key) ? node.key
+                  : /* otherwise */               t.stringLiteral(node.key.name)
         }),
         META:   mergeMeta(opts,
           name,

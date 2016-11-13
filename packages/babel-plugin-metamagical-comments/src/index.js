@@ -630,11 +630,13 @@ module.exports = function({ types: t }) {
         if (doc) {
           includeHelper(path);
           path.insertAfter(withMeta({
-            OBJECT: t.memberExpression(
-              method.static ? path.node.id : t.memberExpression(path.node.id, t.identifier('prototype')), 
-              method.key, 
-              method.computed
-            ),
+            OBJECT: accessorFor(method)({
+              OBJECT: method.static     ?  path.node.id 
+                      : /* otherwise */    t.memberExpression(path.node.id, t.identifier('prototype')),
+              KEY: method.computed                 ?  method.key
+                   : t.isStringLiteral(method.key) ?  method.key
+                   : /* otherwise */                  t.stringLiteral(method.key.name)
+            })            ,
             META: mergeMeta(opts,
               inferName(method.key, method.computed),
               inferSource(path, method),

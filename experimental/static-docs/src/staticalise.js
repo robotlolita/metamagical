@@ -23,9 +23,11 @@ const isDocumented = (meta) => meta.get(meta.fields.documentation)
                                    .map(_ => true)
                                    .getOrElse(false);
 
+const paragraphOrHeading = (node) => node.type === 'paragraph'
+                                  || node.type === 'heading';
 
 const summary = (text) => {
-  const maybeParagraph = marked.lexer(text)[0];
+  const maybeParagraph = marked.lexer(text).filter(paragraphOrHeading)[0];
   if (maybeParagraph && maybeParagraph.type === 'paragraph') {
     return maybeParagraph.text;
   } else {

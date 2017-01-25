@@ -13,11 +13,22 @@ const marked = require('marked');
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 const prototypeOf    = Object.getPrototypeOf;
+const ownProperties  = Object.getOwnPropertyNames;
+const descriptor     = Object.getOwnPropertyDescriptor;
 
 
 // --[ Helpers ]-------------------------------------------------------
 const isObject = (value) => Object(value) === value;
 
+const countNonInherentPrototypeProperties = (value) =>
+  ownProperties(value.prototype).filter(k =>
+    k !== 'constructor' || descriptor(value.prototype, k).value !== value
+  ).length;
+
+const isClass = (value) =>
+   typeof value === 'function'
+&& isObject(descriptor(value, 'prototype').value) // we don't care about getters
+&& countNonInherentPrototypeProperties(value) > 0;
 
 const isDocumented = (meta) => meta.get(meta.fields.documentation)
                                    .map(_ => true)
@@ -155,7 +166,8 @@ const makeStatic = (meta, root, name, options = {}) => {
     references.set(object, id);
     return Object.assign({
       id,
-      path: truePath(object, name, path)
+      path: truePath(object, name, path),
+      isClass: isClass(object)
     }, serialiseMeta(meta.for(object)));
   };
 
@@ -183,6 +195,18 @@ const makeStatic = (meta, root, name, options = {}) => {
   };
 
   go(root, name, []);
+  [...references.entries()].forEach(([object, id]) => {
+    if (isClass(object)) {
+      const entity = result.get(id);
+      const prototype = result.get(references.get(object.prototype));
+      if (!prototype) {
+        entity.isClass = false;
+      } else {
+        entity.prototype = prototype;
+      }
+    }
+  });
+
   return [...result.values()];
 };
 

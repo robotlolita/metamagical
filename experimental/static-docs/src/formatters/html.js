@@ -170,7 +170,7 @@ const render = (entity, references, options) => {
         markdownToHtml(entity.documentation)
       ),
       _('div.members',
-        _('h2.section-title#properties', 'Properties'), 
+        entity.isClass ? '' : _('h2.section-title#properties', 'Properties'), 
         ...renderMembers(entity, references)),
       entity.source ? source(entity.source, entity.location) : ''
     ),
@@ -199,6 +199,11 @@ const render = (entity, references, options) => {
             anchor: '#properties',
             children: memberToc(entity.properties)
           },
+          entity.isClass ? { 
+            title: 'Instance properties',
+            anchor: '#instance-properties',
+            children: memberToc(entity.prototype.properties)
+          } : null,
           entity.source ? { title: 'Source Code', anchor: '#source-code' } : null
         ].filter(Boolean))
       ),

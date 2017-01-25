@@ -175,7 +175,8 @@ const makeStatic = (meta, root, name, options = {}) => {
           reference      : references.get(member.value),
           kind           : member.kind,
           representation : propertyRepresentation(meta, member),
-          meta           : serialiseMeta(meta.for(member.value))
+          meta           : serialiseMeta(meta.for(member.value)),
+          isInherited    : !hasOwnProperty.call(object, member.name)
         }))
       };
     }).filter(group => group.members.length > 0);

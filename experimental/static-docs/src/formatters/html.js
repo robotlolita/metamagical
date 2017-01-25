@@ -69,16 +69,30 @@ const renderMember = (entity, member, references) => {
     _('div.special-tags',
       meta.deprecated ? _('span.tagged.deprecated', 'Deprecated') : '',
       meta.isRequired ? _('span.tagged.required', 'Abstract') : '',
-      meta.stability === 'experimental' ? _('span.tagged.experimental', 'Experimental') : ''
-      // TODO: needs inherited here
+      meta.stability === 'experimental' ? _('span.tagged.experimental', 'Experimental') : '',
+      member.isInherited ? _('span.tagged.inherited', 'Inherited') : ''
     )
   );
 };
 
 const renderMembers = (entity, references) =>
+  entity.isClass ?  renderClassMembers(entity, references)
+: /* otherwise */   renderObjectMembers(entity, references);
+
+
+const renderClassMembers = (entity, references) =>
+  [
+    _('h2.section-title#properties', 'Static properties'),
+    ...renderObjectMembers(entity, references, 4),
+    _('h2.section-title#instance-properties', 'Instance (prototype) properties'),
+    ...renderObjectMembers(entity.prototype, references, 4)
+  ];
+
+
+const renderObjectMembers = (entity, references, level = 3) =>
   entity.properties.map(({ category, members }) =>
     _('div.member-category',
-      _('h3.category', { id: `cat-${toId(category)}` }, category),
+      _(`h${level}.category`, { id: `cat-${toId(category)}` }, category),
       _('div.member-list',
         members.map(member => renderMember(entity, member, references))
       )

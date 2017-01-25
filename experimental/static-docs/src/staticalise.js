@@ -122,7 +122,8 @@ const makeStatic = (meta, root, name, options = {}) => {
                               || references.has(object);
 
   const shouldSkipProperty = (object, property) => 
-    skip.has(findDefinition(object, property));
+     skip.has(findDefinition(object, property))
+  || typeof object === 'function' && ['name', 'length'].includes(property);
 
   const allowsPopping = (path) => (path[0] === '(unknown module)' && path.length > 1)
                                || path.length > 0;

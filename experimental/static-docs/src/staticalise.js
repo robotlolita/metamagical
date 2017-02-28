@@ -27,7 +27,7 @@ const countNonInherentPrototypeProperties = (value) =>
 
 const isClass = (value) =>
    typeof value === 'function'
-&& isObject(descriptor(value, 'prototype').value) // we don't care about getters
+&& isObject((descriptor(value, 'prototype') || {}).value) // we don't care about getters
 && countNonInherentPrototypeProperties(value) > 0;
 
 const isDocumented = (meta) => meta.get(meta.fields.documentation)

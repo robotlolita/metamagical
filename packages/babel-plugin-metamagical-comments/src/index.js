@@ -72,6 +72,13 @@ const readPackage = function() {
   }
 }();
 
+function rebasePath(file, { ignorePrefix = '', prefix = '' }) {
+  const pathname = file.indexOf(ignorePrefix) === 0 ?  file.slice(ignorePrefix.length)
+  :                /* else */                          file;
+
+  return path.join(prefix, pathname);
+}
+
 function computeModuleId(name, root, file) {
   if (!name) {
     return null;
@@ -448,20 +455,21 @@ module.exports = function({ types: t }) {
       return { };
     } else {
       const { contents:p, file:root } = pkg;
+      const mm = p.metamagical || {};
 
       return Object.assign(
         compact({
           location: Object.assign({
             filename: path.relative(root, file),
           }, babelPath.node.loc || {}),
-          module:     computeModuleId(p.name, root, file),
+          module:     computeModuleId(p.name, root, rebasePath(file, mm.modulePath)),
           homepage:   p.homepage,
           licence:    p.license || p.licence,
           authors:    [p.author].concat(p.contributors || []).filter(Boolean),
           repository: getRepository(p.repository),
           npmPackage: p.name
         }),
-        p.metamagical || {}
+        mm.commonMetadata || {}
       );
     }
   }

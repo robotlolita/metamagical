@@ -163,7 +163,7 @@ function getDocComment(node) {
 }
 
 function parseDoc(doc) {
-  const source = doc.replace(/^~[ \t]*/m, '')
+  const source = doc.replace(/^~[ \t]?/m, '')
                     .replace(/^[ \t]*\*[ \t]?/gm, '')
 
   let meta = yaml.safeLoad(source) || {};

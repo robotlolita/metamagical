@@ -493,6 +493,13 @@ module.exports = function({ types: t }) {
       t.assertExpressionStatement(ast.program.body[0]);
 
       return lazy(ast.program.body[0].expression);
+    },
+
+    '~inheritsMeta'(value) {
+      const ast = parse(value);
+      t.assertExpressionStatement(ast.program.body[0]);
+
+      return lazy(ast.program.body[0].expression);
     }
   }
 

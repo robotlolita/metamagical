@@ -141,7 +141,7 @@ function merge(...args) {
 
 function isDocComment(comment) {
   return comment.type === 'CommentBlock'
-  &&     /^~\s*$/m.test(comment.value);
+  &&     /^~\s/m.test(comment.value);
 }
 
 function last(xs) {
@@ -156,12 +156,10 @@ function getDocComment(node) {
 }
 
 function parseDoc(doc) {
-  const parts = doc.replace(/^~[ \t]*$/m, '')
-                 .replace(/^[ \t]*\*[ \t]?/gm, '')
-                 .split(/\n[ \t]*-{3,}[ \t]*\n/);
+  const source = doc.replace(/^~[ \t]*/m, '')
+                    .replace(/^[ \t]*\*[ \t]?/gm, '')
 
-  let meta = yaml.safeLoad(parts[1] || '') || {};
-  meta.documentation = parts[0] || '';
+  let meta = yaml.safeLoad(source) || {};
   return meta;
 }
 

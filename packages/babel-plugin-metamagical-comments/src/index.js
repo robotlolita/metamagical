@@ -72,7 +72,7 @@ const readPackage = function() {
   }
 }();
 
-function rebasePath(file, { ignorePrefix = '', prefix = '' }) {
+function rebasePath(file, { ignorePrefix = '', prefix = '' } = {}) {
   const pathname = file.indexOf(ignorePrefix) === 0 ?  file.slice(ignorePrefix.length)
   :                /* else */                          file;
 
@@ -736,5 +736,9 @@ module.exports = function({ types: t }) {
     }
   };
 
-  return { visitor };
+  if (process.env.DISABLE_MM_COMMENTS) {
+    return { visitor: {} };
+  } else {
+    return { visitor };
+  }
 };

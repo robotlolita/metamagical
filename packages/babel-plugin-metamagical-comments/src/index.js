@@ -72,19 +72,19 @@ const readPackage = function() {
   }
 }();
 
-function rebasePath(file, { ignorePrefix = '', prefix = '' } = {}) {
+function rebasePath(root, fullPath, { ignorePrefix = '', prefix = '' } = {}) {
+  const file = path.relative(root, fullPath);
   const pathname = file.indexOf(ignorePrefix) === 0 ?  file.slice(ignorePrefix.length)
   :                /* else */                          file;
 
   return path.join(prefix, pathname);
 }
 
-function computeModuleId(name, root, file) {
+function computeModuleId(name, modulePath) {
   if (!name) {
     return null;
   }
 
-  let modulePath = path.relative(root, file);
   if (path.extname(modulePath) === '.js') {
     modulePath = modulePath.slice(0, -3);
   }
@@ -462,7 +462,7 @@ module.exports = function({ types: t }) {
           location: Object.assign({
             filename: path.relative(root, file),
           }, babelPath.node.loc || {}),
-          module:     computeModuleId(p.name, root, rebasePath(file, mm.modulePath)),
+          module:     computeModuleId(p.name, rebasePath(root, file, mm.modulePath)),
           homepage:   p.homepage,
           licence:    p.license || p.licence,
           authors:    [p.author].concat(p.contributors || []).filter(Boolean),

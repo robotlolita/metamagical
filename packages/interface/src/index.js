@@ -57,7 +57,11 @@ function getMeta(object) {
   }
   Object.assign(data, metadata.get(object) || {});
 
-  return data;
+  if (data['~inheritsMeta']) {
+    return Object.assign({}, getMeta(data['~inheritsMeta']()), data);
+  } else {
+    return data;
+  }
 }
 
 

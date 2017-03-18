@@ -519,6 +519,7 @@ module.exports = function({ types: t }) {
     :      isBoolean(value)      ?  t.booleanLiteral(value)
     :      isNumber(value)       ?  t.numericLiteral(value)
     :      isObject(value)       ?  objectToExpression(value)
+    :      value === null        ?  t.nullLiteral()
     :      /* otherwise */          raise(new TypeError(`Type of property not supported: ${value}`));
   }
 

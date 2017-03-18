@@ -10,6 +10,7 @@
 // --[ Dependencies ]--------------------------------------------------
 const uuid   = require('node-uuid').v4;
 const marked = require('marked');
+const Maybe  = require('folktale').data.maybe;
 
 const hasOwnProperty = Object.prototype.hasOwnProperty;
 const prototypeOf    = Object.getPrototypeOf;
@@ -134,7 +135,8 @@ const makeStatic = (meta, root, name, options = {}) => {
 
   const shouldSkipProperty = (object, property) => 
      skip.has(findDefinition(object, property))
-  || typeof object === 'function' && ['name', 'length'].includes(property);
+  || (typeof object === 'function' && ['name', 'length'].includes(property))
+  || (!isClass(object) && property === 'prototype');
 
   const allowsPopping = (path) => (path[0] === '(unknown module)' && path.length > 1)
                                || path.length > 0;
@@ -142,6 +144,7 @@ const makeStatic = (meta, root, name, options = {}) => {
 
   const computeIndexPath = (object, path) => meta.for(object)
                                                  .get(meta.fields.module)
+                                                 .chain(Maybe.fromNullable)
                                                  .map(modulePath => modulePath.split('/'))
                                                  .getOrElse(['(unknown module)', ...path]);
 

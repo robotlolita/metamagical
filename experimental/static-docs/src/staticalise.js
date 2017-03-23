@@ -21,6 +21,8 @@ const descriptor     = Object.getOwnPropertyDescriptor;
 // --[ Helpers ]-------------------------------------------------------
 const isObject = (value) => Object(value) === value;
 
+const dasherise = (name) => name.replace(/\W/g, '-');
+
 const countNonInherentPrototypeProperties = (value) =>
   ownProperties(value.prototype).filter(k =>
     k !== 'constructor' || descriptor(value.prototype, k).value !== value
@@ -160,7 +162,7 @@ const makeStatic = (meta, root, name, options = {}) => {
       name = parentPath.pop();
     }
 
-    return [...parentPath, name];
+    return [...parentPath, name].map(dasherise);
   };
 
 

@@ -53,7 +53,7 @@ module.exports = (meta, describe, it) => (object) => {
     m.get(_.examples).chain(examples => {
       const exampleGroups = groupBy(examples, exampleDescription);
       exampleGroups.forEach(([heading, functions]) => {
-        it(heading, () => functions.forEach(f => f.call()));
+        it(heading, () => functions.reduce((p, f) => p.then(_ => f.call()), Promise.resolve()));
       });
     });
 

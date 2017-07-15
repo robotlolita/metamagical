@@ -72,12 +72,19 @@ const readPackage = function() {
   }
 }();
 
-function computeModuleId(name, root, file) {
+function rebasePath(root, fullPath, { ignorePrefix = '', prefix = '' } = {}) {
+  const file = path.relative(root, fullPath);
+  const pathname = file.indexOf(ignorePrefix) === 0 ?  file.slice(ignorePrefix.length)
+  :                /* else */                          file;
+
+  return path.join(prefix, pathname);
+}
+
+function computeModuleId(name, modulePath) {
   if (!name) {
     return null;
   }
 
-  let modulePath = path.relative(root, file);
   if (path.extname(modulePath) === '.js') {
     modulePath = modulePath.slice(0, -3);
   }
@@ -141,7 +148,7 @@ function merge(...args) {
 
 function isDocComment(comment) {
   return comment.type === 'CommentBlock'
-  &&     /^~\s*$/m.test(comment.value);
+  &&     /^~\s/m.test(comment.value);
 }
 
 function last(xs) {
@@ -156,12 +163,10 @@ function getDocComment(node) {
 }
 
 function parseDoc(doc) {
-  const parts = doc.replace(/^~[ \t]*$/m, '')
-                 .replace(/^[ \t]*\*[ \t]?/gm, '')
-                 .split(/\n[ \t]*-{3,}[ \t]*\n/);
+  const source = doc.replace(/^~[ \t]?/m, '')
+                    .replace(/^[ \t]*\*[ \t]?/gm, '')
 
-  let meta = yaml.safeLoad(parts[1] || '') || {};
-  meta.documentation = parts[0] || '';
+  let meta = yaml.safeLoad(source) || {};
   return meta;
 }
 
@@ -450,20 +455,21 @@ module.exports = function({ types: t }) {
       return { };
     } else {
       const { contents:p, file:root } = pkg;
+      const mm = p.metamagical || {};
 
       return Object.assign(
         compact({
           location: Object.assign({
             filename: path.relative(root, file),
           }, babelPath.node.loc || {}),
-          module:     computeModuleId(p.name, root, file),
+          module:     computeModuleId(p.name, rebasePath(root, file, mm.modulePath)),
           homepage:   p.homepage,
           licence:    p.license || p.licence,
           authors:    [p.author].concat(p.contributors || []).filter(Boolean),
           repository: getRepository(p.repository),
           npmPackage: p.name
         }),
-        p.metamagical || {}
+        mm.commonMetadata || {}
       );
     }
   }
@@ -487,6 +493,13 @@ module.exports = function({ types: t }) {
       t.assertExpressionStatement(ast.program.body[0]);
 
       return lazy(ast.program.body[0].expression);
+    },
+
+    '~inheritsMeta'(value) {
+      const ast = parse(value);
+      t.assertExpressionStatement(ast.program.body[0]);
+
+      return lazy(ast.program.body[0].expression);
     }
   }
 
@@ -506,6 +519,7 @@ module.exports = function({ types: t }) {
     :      isBoolean(value)      ?  t.booleanLiteral(value)
     :      isNumber(value)       ?  t.numericLiteral(value)
     :      isObject(value)       ?  objectToExpression(value)
+    :      value === null        ?  t.nullLiteral()
     :      /* otherwise */          raise(new TypeError(`Type of property not supported: ${value}`));
   }
 
@@ -730,5 +744,9 @@ module.exports = function({ types: t }) {
     }
   };
 
-  return { visitor };
+  if (process.env.DISABLE_MM_COMMENTS) {
+    return { visitor: {} };
+  } else {
+    return { visitor };
+  }
 };

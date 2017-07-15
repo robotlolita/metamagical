@@ -13,6 +13,7 @@
     "url": "https://github.com/origamitower/metamagical/issues"
   },
   "dependencies": {
+    "folktale": "^2.0.0-alpha3",
     "html-element": "^2.1.1",
     "hyperscript": "^2.0.2",
     "marked": "^0.3.6",
